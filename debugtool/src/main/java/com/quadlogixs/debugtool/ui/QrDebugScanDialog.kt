@@ -226,7 +226,7 @@ fun QrDebugScanDialog(onDismiss: () -> Unit) {
                                             .background(MaterialTheme.colorScheme.surfaceVariant),
                                     ) {
                                         CameraScreen(
-                                            analyzerType = AnalyzerType.BARCODE,
+                                            analyzerType = AnalyzerType.QR,
                                             onQrScanned = { scanned ->
                                                 if (!scanLocked) {
                                                     processQrString(scanned)
