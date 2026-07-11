@@ -41,7 +41,26 @@ class DebugToolViewModel @Inject constructor(
         severity.value = listOf("Critical", "High", "Medium", "Low")
     }
 
-    fun getListOfAssignsItems() = DebugToolRegistry.config.assignees.ifEmpty { defaultAssignees() }
+    fun getListOfAssignsItems(): List<AssignedTo> {
+        val fromHost = if (DebugToolRegistry.isInstalled()) {
+            DebugToolRegistry.host.assignees()
+        } else {
+            emptyList()
+        }
+        val fromConfig = if (DebugToolRegistry.isInstalled()) {
+            DebugToolRegistry.config.assignees
+        } else {
+            emptyList()
+        }
+        val source = when {
+            fromHost.isNotEmpty() -> fromHost
+            fromConfig.isNotEmpty() -> fromConfig
+            else -> defaultAssignees()
+        }
+        return source.mapIndexed { index, item ->
+            item.copy(isChecked = index == 0)
+        }
+    }
 
     private fun defaultAssignees() = listOf(
         AssignedTo(name = "Farooq Khan", emailAddress = "farooq.khan@appinsnap.com"),

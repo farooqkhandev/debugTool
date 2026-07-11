@@ -20,6 +20,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.quadlogixs.debugtool.R
+import com.quadlogixs.debugtool.api.DebugToolRegistry
 import com.quadlogixs.debugtool.ui.components.LabelSmallText
 import com.quadlogixs.debugtool.ui.components.TitleLargeText
 import com.quadlogixs.debugtool.ui.components.ResourceImage
@@ -70,15 +72,24 @@ fun ShowDebugToolMenuDialog(
     var showAnimationSpeedDialog by remember { mutableStateOf(false) }
     var showScreenSizeDialog by remember { mutableStateOf(false) }
     var showLocationSpooferDialog by remember { mutableStateOf(false) }
+    var resolvedEnvironmentName by remember { mutableStateOf(metadata.environmentName) }
+
+    LaunchedEffect(metadata.environmentName) {
+        resolvedEnvironmentName = resolveSelectedEnvironmentTitle(metadata.environmentName)
+    }
+
+    val displayMetadata = remember(metadata, resolvedEnvironmentName) {
+        metadata.copy(environmentName = resolvedEnvironmentName)
+    }
 
     val apiRecords by ApiSpeedTracker.records.collectAsState()
     val mockResponses by MockApiResponseStore.mocks.collectAsState()
     val activeMocks = mockResponses.count { it.enabled }
-    val sections = remember(haltAllEnabled, isEncEnable, metadata, apiRecords, mockResponses) {
+    val sections = remember(haltAllEnabled, isEncEnable, displayMetadata, apiRecords, mockResponses) {
         buildDebugMenuSections(
             haltAllEnabled = haltAllEnabled,
             isEncEnable = isEncEnable,
-            metadata = metadata,
+            metadata = displayMetadata,
             apiRequestCount = apiRecords.size,
             activeMockCount = activeMocks,
         )
@@ -118,7 +129,7 @@ fun ShowDebugToolMenuDialog(
                         .verticalScroll(rememberScrollState())
                         .padding(bottom = 32.dp),
                 ) {
-                    DebugMenuHeader(metadata = metadata, onDismissRequest = onDismissRequest)
+                    DebugMenuHeader(metadata = displayMetadata, onDismissRequest = onDismissRequest)
                     sections.forEach { section ->
                         DebugMainMenuSection(
                             title = section.title,
@@ -442,4 +453,24 @@ enum class DebuggerActions {
     ScreenSizeSimulator,
     LocationSpoofer,
     NONE,
+}
+
+/**
+ * Prefers the selected runtime environment title from [DebugToolHost], so the menu
+ * does not show the build flavor (e.g. DEV) when QA/UAT/etc. is selected.
+ */
+private suspend fun resolveSelectedEnvironmentTitle(fallback: String): String {
+    if (!DebugToolRegistry.isInstalled()) return fallback
+    return runCatching {
+        val host = DebugToolRegistry.host
+        val environments = host.environments()
+        val currentUrl = host.currentEnvironment().trimEnd('/')
+        if (currentUrl.isBlank() || currentUrl.equals("default", ignoreCase = true)) {
+            return@runCatching environments.firstOrNull()?.title ?: fallback
+        }
+        environments
+            .firstOrNull { it.url.trimEnd('/') == currentUrl }
+            ?.title
+            ?: fallback
+    }.getOrDefault(fallback)
 }

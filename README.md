@@ -83,6 +83,12 @@ class MyDebugToolHost(
 
     override fun isEncryptionEnabled(context: Context): Boolean = true
     override suspend fun setEncryptionEnabled(context: Context, enabled: Boolean) { /* optional */ }
+
+    // Team members for Report Issue → Assigned To
+    override fun assignees() = listOf(
+        AssignedTo(name = "Farooq Khan", emailAddress = "farooq.khan@appinsnap.com"),
+        AssignedTo(name = "Team Member", emailAddress = "member@example.com"),
+    )
 }
 ```
 
@@ -108,9 +114,7 @@ class MyApplication : Application() {
                             System.getenv("AZURE_DEVOPS_PAT").orEmpty()
                         },
                     ),
-                    assignees = listOf(
-                        AssignedTo(name = "Dev", emailAddress = "dev@example.com"),
-                    ),
+                    // Optional fallback if host.assignees() is empty
                     azureLabel = "your-project/debugTool",
                 ),
             )

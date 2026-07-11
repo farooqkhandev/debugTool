@@ -34,7 +34,9 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -161,6 +163,7 @@ fun BodySmallText(
     textAlign: TextAlign = TextAlign.Start,
     fontWeight: FontWeight? = null,
     maxLines: Int = Int.MAX_VALUE,
+    softWrap: Boolean = true,
     overflow: TextOverflow = TextOverflow.Clip,
 ) {
     Text(
@@ -170,6 +173,7 @@ fun BodySmallText(
         color = overrideColor,
         textAlign = textAlign,
         maxLines = maxLines,
+        softWrap = softWrap,
         overflow = overflow,
     )
 }
@@ -454,20 +458,36 @@ fun RadioButtonWithText(
     title: String = "",
     onSelectedChanged: ((Boolean) -> Unit)? = null,
     enabled: Boolean = true,
+    compact: Boolean = false,
     bodyContent: @Composable () -> Unit = {
-        BodySmallText(text = title)
+        BodySmallText(
+            text = title,
+            maxLines = 1,
+            softWrap = false,
+        )
     },
 ) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AppRadioButton(
-            selected = selected,
-            enabled = enabled,
-            onSelectedChanged = { onSelectedChanged?.invoke(!selected) },
-        )
-        bodyContent()
+    val content = @Composable {
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            AppRadioButton(
+                selected = selected,
+                enabled = enabled,
+                onSelectedChanged = { onSelectedChanged?.invoke(!selected) },
+            )
+            bodyContent()
+        }
+    }
+    if (compact) {
+        CompositionLocalProvider(
+            LocalMinimumInteractiveComponentSize provides 0.dp,
+        ) {
+            content()
+        }
+    } else {
+        content()
     }
 }
 

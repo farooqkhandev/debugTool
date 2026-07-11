@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -36,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -96,7 +98,7 @@ fun DebugIssueDialog(
     var description by remember { mutableStateOf("") }
     var area by remember { mutableStateOf("") }
     var tags by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(assignedToState.size > 1) }
 
     var selectedPriority by remember { mutableStateOf("High") }
     var selectedSaverity by remember { mutableStateOf("Critical") }
@@ -234,29 +236,37 @@ fun DebugIssueDialog(
                                 SpacerHeight(10.sdp)
 
                                 if (expanded) {
-                                    assignedToState.forEachIndexed { index, item ->
-                                        AssignToItem(
-                                            item = item,
-                                            isChecked = item.isChecked,
-                                            onSelectItem = { selectedItem ->
-                                                Timber.d("Selected item -> $selectedItem")
-                                                selectedAssignedItem = item
-                                                val tempList = viewModel.getListOfAssignsItems()
-                                                tempList[index].isChecked = true
-                                                assignedToState = tempList
-                                                expanded = false
-                                            })
-                                        if (index != assignedToState.size - 1) {
-                                            SpacerHeight(5.sdp)
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .heightIn(max = 220.sdp)
+                                            .verticalScroll(rememberScrollState()),
+                                    ) {
+                                        assignedToState.forEachIndexed { index, item ->
+                                            AssignToItem(
+                                                item = item,
+                                                isChecked = item.isChecked,
+                                                onSelectItem = {
+                                                    selectedAssignedItem = item
+                                                    assignedToState = assignedToState.mapIndexed { i, assignee ->
+                                                        assignee.copy(isChecked = i == index)
+                                                    }
+                                                    expanded = false
+                                                },
+                                            )
+                                            if (index != assignedToState.lastIndex) {
+                                                SpacerHeight(5.sdp)
+                                            }
                                         }
                                     }
                                 } else {
                                     AssignToItem(
                                         item = selectedAssignedItem,
                                         isChecked = true,
-                                        onSelectItem = { selectedItem ->
-                                            Timber.d("Selected item -> $selectedItem")
-                                        })
+                                        onSelectItem = {
+                                            expanded = true
+                                        },
+                                    )
                                     SpacerHeight(5.sdp)
                                 }
 
@@ -315,62 +325,29 @@ fun DebugIssueDialog(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    RadioButtonWithText(
-                                        selected = selectedPriority == "High",
-                                        title = "High",
-                                        bodyContent = {
-                                            BodySmallText(
-                                                text = "High",
-                                                fontSize = 10.textSdp,
-                                                overrideColor = if (selectedPriority == "High") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
-                                            )
-                                        },
-                                        onSelectedChanged = {
-                                            selectedPriority = "High"
-                                        }
-                                    )
-                                    RadioButtonWithText(
-                                        selected = selectedPriority == "Urgent",
-                                        title = "Urgent",
-                                        bodyContent = {
-                                            BodySmallText(
-                                                text = "Urgent",
-                                                fontSize = 10.textSdp,
-                                                overrideColor = if (selectedPriority == "Urgent") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
-                                            )
-                                        },
-                                        onSelectedChanged = {
-                                            selectedPriority = "Urgent"
-                                        }
-                                    )
-                                    RadioButtonWithText(
-                                        selected = selectedPriority == "Medium",
-                                        title = "Medium",
-                                        bodyContent = {
-                                            BodySmallText(
-                                                text = "Medium",
-                                                fontSize = 10.textSdp,
-                                                overrideColor = if (selectedPriority == "Medium") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
-                                            )
-                                        },
-                                        onSelectedChanged = {
-                                            selectedPriority = "Medium"
-                                        }
-                                    )
-                                    RadioButtonWithText(
-                                        selected = selectedPriority == "Low",
-                                        title = "Low",
-                                        bodyContent = {
-                                            BodySmallText(
-                                                text = "Low",
-                                                fontSize = 10.textSdp,
-                                                overrideColor = if (selectedPriority == "Low") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
-                                            )
-                                        },
-                                        onSelectedChanged = {
-                                            selectedPriority = "Low"
-                                        }
-                                    )
+                                    listOf("High", "Urgent", "Medium", "Low").forEach { option ->
+                                        RadioButtonWithText(
+                                            selected = selectedPriority == option,
+                                            title = option,
+                                            compact = true,
+                                            bodyContent = {
+                                                BodySmallText(
+                                                    text = option,
+                                                    fontSize = 10.textSdp,
+                                                    maxLines = 1,
+                                                    softWrap = false,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    overrideColor = if (selectedPriority == option) {
+                                                        MaterialTheme.colorScheme.onPrimary
+                                                    } else {
+                                                        MaterialTheme.colorScheme.onBackground
+                                                    },
+                                                )
+                                            },
+                                            onSelectedChanged = { selectedPriority = option },
+                                            modifier = Modifier.weight(1f),
+                                        )
+                                    }
                                 }
                                 SpacerHeight(10.sdp)
 
@@ -384,66 +361,29 @@ fun DebugIssueDialog(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    RadioButtonWithText(
-                                        selected = selectedSaverity == "Critical",
-                                        title = "Critical",
-                                        bodyContent = {
-                                            BodySmallText(
-                                                text = "Critical",
-                                                fontSize = 10.textSdp,
-                                                overrideColor = if (selectedSaverity == "Critical") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
-                                            )
-                                        },
-                                        onSelectedChanged = {
-                                            selectedSaverity = "Critical"
-                                        },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    RadioButtonWithText(
-                                        selected = selectedSaverity == "High",
-                                        title = "High",
-                                        bodyContent = {
-                                            BodySmallText(
-                                                text = "High",
-                                                fontSize = 10.textSdp,
-                                                overrideColor = if (selectedSaverity == "High") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
-                                            )
-                                        },
-                                        onSelectedChanged = {
-                                            selectedSaverity = "High"
-                                        },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    RadioButtonWithText(
-                                        selected = selectedSaverity == "Medium",
-                                        title = "Medium",
-                                        bodyContent = {
-                                            BodySmallText(
-                                                text = "Medium",
-                                                fontSize = 10.textSdp,
-                                                overrideColor = if (selectedSaverity == "Medium") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
-                                            )
-                                        },
-                                        onSelectedChanged = {
-                                            selectedSaverity = "Medium"
-                                        },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    RadioButtonWithText(
-                                        selected = selectedSaverity == "Low",
-                                        title = "Low",
-                                        bodyContent = {
-                                            BodySmallText(
-                                                text = "Low",
-                                                fontSize = 10.textSdp,
-                                                overrideColor = if (selectedSaverity == "Low") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
-                                            )
-                                        },
-                                        onSelectedChanged = {
-                                            selectedSaverity = "Low"
-                                        },
-                                        modifier = Modifier.weight(1f)
-                                    )
+                                    listOf("Critical", "High", "Medium", "Low").forEach { option ->
+                                        RadioButtonWithText(
+                                            selected = selectedSaverity == option,
+                                            title = option,
+                                            compact = true,
+                                            bodyContent = {
+                                                BodySmallText(
+                                                    text = option,
+                                                    fontSize = 10.textSdp,
+                                                    maxLines = 1,
+                                                    softWrap = false,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    overrideColor = if (selectedSaverity == option) {
+                                                        MaterialTheme.colorScheme.onPrimary
+                                                    } else {
+                                                        MaterialTheme.colorScheme.onBackground
+                                                    },
+                                                )
+                                            },
+                                            onSelectedChanged = { selectedSaverity = option },
+                                            modifier = Modifier.weight(1f),
+                                        )
+                                    }
                                 }
 
                             }

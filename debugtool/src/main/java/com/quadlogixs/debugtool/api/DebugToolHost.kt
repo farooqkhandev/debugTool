@@ -16,4 +16,10 @@ interface DebugToolHost {
     suspend fun setEncryptionEnabled(context: android.content.Context, enabled: Boolean)
 
     fun deviceId(): String
+
+    /**
+     * People shown in Report Issue → Assigned To.
+     * Prefer this over [DebugToolConfig.assignees] when the host app owns the team roster.
+     */
+    fun assignees(): List<AssignedTo> = emptyList()
 }

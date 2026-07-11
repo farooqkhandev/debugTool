@@ -58,6 +58,12 @@ class SampleDebugToolHost @Inject constructor(
             id
         }
 
+    override fun assignees(): List<AssignedTo> = listOf(
+        AssignedTo(name = "Sample Dev", emailAddress = "dev@example.com"),
+        AssignedTo(name = "Sample QA", emailAddress = "qa@example.com"),
+        AssignedTo(name = "Sample Lead", emailAddress = "lead@example.com"),
+    )
+
     companion object {
         private const val KEY_ENV = "environment"
         private const val KEY_ENC = "encryption_enabled"
@@ -82,9 +88,8 @@ class SampleDebugToolHost @Inject constructor(
                 areaPath = "your-project",
                 patProvider = patProvider,
             ),
-            assignees = listOf(
-                AssignedTo(name = "Sample Dev", emailAddress = "dev@example.com"),
-            ),
+            // Prefer DebugToolHost.assignees(); config list is only a fallback.
+            assignees = emptyList(),
             azureLabel = "sample/debugTool",
         )
     }

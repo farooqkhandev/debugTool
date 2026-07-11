@@ -91,7 +91,8 @@ private fun SampleScreen(host: SampleDebugToolHost) {
     val metadata = remember(crashCount) {
         DebugMenuMetadata(
             appVersion = BuildConfig.VERSION_NAME,
-            environmentName = host.flavorName(),
+            // Prefer selected env title; ShowDebugToolMenuDialog also resolves this from DebugToolHost.
+            environmentName = host.environments().firstOrNull()?.title ?: host.flavorName(),
             azureLabel = "sample/debugTool",
             crashCount = crashCount,
         )
