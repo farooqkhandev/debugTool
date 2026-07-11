@@ -43,12 +43,12 @@ dependencyResolutionManagement {
 `app/build.gradle.kts`:
 
 ```kotlin
-debugImplementation("com.github.farooqkhandev:debugtool:1.0.0")
+debugImplementation("com.github.farooqkhandev:debugtool:1.0.1")
 ```
 
 > Use **`debugImplementation`**, never `implementation`.
 
-If Gradle cannot resolve the artifact, open https://jitpack.io/#farooqkhandev/debugTool and wait for tag `1.0.0` to turn green, or publish locally:
+If Gradle cannot resolve the artifact, open https://jitpack.io/#farooqkhandev/debugTool and wait for tag `1.0.1` to turn green, or publish locally:
 
 ```bash
 ./gradlew :debugtool:publishToMavenLocal
@@ -216,12 +216,12 @@ Pass org / project / area path via `AzureDevOpsConfig` when building `DebugToolC
 ## Publish (maintainers)
 
 1. Push to GitHub  
-2. Create a release tag (e.g. `1.0.0`)  
+2. Create a release tag (e.g. `1.0.1`)  
 3. Build on https://jitpack.io → wait for green  
 4. Consumers use:
 
 ```kotlin
-debugImplementation("com.github.farooqkhandev:debugtool:1.0.0")
+debugImplementation("com.github.farooqkhandev:debugtool:1.0.1")
 ```
 
 Local check before tagging:
