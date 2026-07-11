@@ -131,8 +131,9 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor.v4100)
 
-    debugImplementation(libs.chucker)
-    releaseImplementation(libs.chucker.release)
+    // Always ship the real Chucker API. This library is consumed via debugImplementation only;
+    // publishing release+library-no-op makes host debug builds collide with their own chucker:library.
+    api(libs.chucker)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
