@@ -20,6 +20,7 @@ This file uses a Process-based reader but the `startLogcatStreaming()` function 
 
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -55,6 +57,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -65,6 +68,7 @@ import com.quadlogixs.debugtool.ui.components.ResourceImage
 import com.quadlogixs.debugtool.ui.components.safeClickable
 import com.quadlogixs.debugtool.ui.components.sdp
 import com.quadlogixs.debugtool.R
+import com.quadlogixs.debugtool.ui.theme.DebugColors
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -185,35 +189,72 @@ private fun FilterRow(levelsSelected: Set<String>, onLevelToggle: (String) -> Un
 
 @Composable
 private fun FilterChip(text: String, selected: Boolean, onClick: () -> Unit) {
+    val accent = when (text) {
+        "V" -> DebugColors.ChipVerbose
+        "D" -> DebugColors.ChipDebug
+        "I" -> DebugColors.ChipInfo
+        "W" -> DebugColors.ChipWarn
+        "E" -> DebugColors.ChipError
+        else -> DebugColors.TextSecondary
+    }
     Surface(
-        modifier = Modifier.wrapContentSize().clickable(onClick = onClick),
-        color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent,
-        shape = MaterialTheme.shapes.small
+        modifier = Modifier
+            .wrapContentSize()
+            .clickable(onClick = onClick)
+            .border(
+                width = 1.dp,
+                color = if (selected) accent else DebugColors.Border,
+                shape = MaterialTheme.shapes.small,
+            ),
+        color = if (selected) accent.copy(alpha = 0.15f) else Color.Transparent,
+        shape = MaterialTheme.shapes.small,
     ) {
-        LabelMediumText(text = text, modifier = Modifier.padding(6.dp))
+        LabelMediumText(
+            text = text,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+            overrideColor = if (selected) accent else DebugColors.TextSecondary,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+        )
     }
 }
 
 @Composable
 private fun LogRow(entry: LogEntry, highlight: String, useRegex: Boolean,clipboardManager:ClipboardManager) {
     var expanded by remember { mutableStateOf(false) }
-    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp).animateContentSize()) {
-        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+    val levelColor = when (entry.level.uppercase()) {
+        "V" -> DebugColors.ChipVerbose
+        "D" -> DebugColors.ChipDebug
+        "I" -> DebugColors.ChipInfo
+        "W" -> DebugColors.ChipWarn
+        "E" -> DebugColors.ChipError
+        else -> DebugColors.TextSecondary
+    }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp)
+            .animateContentSize(),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 LabelSmallText(
                     text = formatTimestamp(entry.timestamp),
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.width(140.dp),
+                    overrideColor = levelColor,
                 )
                 LabelSmallText(
                     text = entry.level,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 6.dp),
+                    overrideColor = levelColor,
                 )
                 LabelSmallText(
                     text = entry.tag,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(end = 6.dp),
+                    overrideColor = levelColor,
                 )
                 Spacer(modifier = Modifier.weight(1f))
                  ResourceImage(modifier = Modifier.size(18.sdp).safeClickable{
@@ -229,8 +270,8 @@ private fun LogRow(entry: LogEntry, highlight: String, useRegex: Boolean,clipboa
             val annotated = highlightAnnotated(entry.message, highlight, useRegex)
             Text(
                 text = annotated,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                color = levelColor,
             )
             if (expanded) {
                 LabelSmallText(text = "PID: ${entry.pid}  TID: ${entry.thread}")

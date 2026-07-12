@@ -57,6 +57,8 @@ import com.quadlogixs.debugtool.ui.showDebugToast
 import com.quadlogixs.debugtool.ui.components.textSdp
 import com.quadlogixs.debugtool.ui.components.HorizontalLineDivider
 import com.quadlogixs.debugtool.R
+import com.quadlogixs.debugtool.ui.theme.DebugColors
+import com.quadlogixs.debugtool.ui.theme.DebugToolTheme
 import com.quadlogixs.debugtool.ui.utils.qrutils.QRTlvParseResult
 import com.quadlogixs.debugtool.ui.utils.qrutils.QRTlvTableRow
 import com.quadlogixs.debugtool.ui.utils.qrutils.checkCRCValidity
@@ -77,6 +79,13 @@ private object QrTlvTableLayout {
 
 @Composable
 fun QrDebugScanDialog(onDismiss: () -> Unit) {
+    DebugToolTheme {
+        QrDebugScanDialogBody(onDismiss = onDismiss)
+    }
+}
+
+@Composable
+private fun QrDebugScanDialogBody(onDismiss: () -> Unit) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
     val resultsScrollState = rememberScrollState()
@@ -133,6 +142,8 @@ fun QrDebugScanDialog(onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         CardContainer(
             modifier = Modifier.fillMaxWidth(),
+            containerColor = DebugColors.Background,
+            borderColor = DebugColors.Border,
             content = {
                 Column(
                     modifier = Modifier
@@ -141,8 +152,8 @@ fun QrDebugScanDialog(onDismiss: () -> Unit) {
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         TitleMediumText(
-                            text = "QR Code Inspector",
-                            overrideColor = MaterialTheme.colorScheme.onPrimary,
+                            text = "Scan QR Code",
+                            overrideColor = DebugColors.TextPrimary,
                         )
                         SpacerWeight(1f)
                         ResourceImage(
@@ -177,13 +188,13 @@ fun QrDebugScanDialog(onDismiss: () -> Unit) {
                                     .fillMaxWidth()
                                     .height(38.dp),
                                 primary = true,
-                                containerColor = MaterialTheme.colorScheme.secondary,
+                                containerColor = DebugColors.AccentGreen,
                                 onClick = { processQrString(manualInput) },
                             ) {
                                 LabelMediumText(
-                                    text = "Parse",
+                                    text = "Import Configuration",
                                     fontSize = 12.textSdp,
-                                    overrideColor = MaterialTheme.colorScheme.background,
+                                    overrideColor = DebugColors.OnAccent,
                                 )
                             }
                         }

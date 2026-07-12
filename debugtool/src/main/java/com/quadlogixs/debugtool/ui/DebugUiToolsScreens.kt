@@ -52,14 +52,17 @@ import com.quadlogixs.debugtool.ui.components.ResourceImage
 import com.quadlogixs.debugtool.core.DebugUiToolsStore
 import com.quadlogixs.debugtool.core.DynamicTypeLevel
 import com.quadlogixs.debugtool.R
+import com.quadlogixs.debugtool.ui.theme.DebugColors
 import kotlin.math.roundToInt
 
-internal val DebugMenuBackground = Color(0xFFF2F2F7)
-internal val DebugSectionCardColor = Color.White
-internal val DebugSectionHeaderColor = Color(0xFF8E8E93)
-internal val DebugTitleColor = Color(0xFF1C1C1E)
-internal val DebugSubtitleColor = Color(0xFF8E8E93)
-internal val DebugChevronColor = Color(0xFFC7C7CC)
+internal val DebugMenuBackground = DebugColors.Background
+internal val DebugSectionCardColor = DebugColors.Surface
+internal val DebugSectionHeaderColor = DebugColors.TextSecondary
+internal val DebugTitleColor = DebugColors.TextPrimary
+internal val DebugSubtitleColor = DebugColors.TextSecondary
+internal val DebugChevronColor = DebugColors.TextSecondary
+internal val DebugDividerColor = DebugColors.Border
+internal val DebugCloseButtonBg = DebugColors.SurfaceElevated
 
 internal data class DebugMenuItemModel(
     val title: String,
@@ -100,14 +103,14 @@ internal fun DebugSubMenuHeader(
                 .align(Alignment.CenterStart)
                 .size(32.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFE5E5EA))
+                .background(DebugCloseButtonBg)
                 .clickable(onClick = onBack),
             contentAlignment = Alignment.Center,
         ) {
             ResourceImage(
                 image = R.drawable.ic_back,
                 modifier = Modifier.size(14.dp),
-                colorFilter = ColorFilter.tint(DebugSubtitleColor),
+                colorFilter = ColorFilter.tint(DebugTitleColor),
             )
         }
 
@@ -187,7 +190,7 @@ internal fun DebugMenuItemList(
                     HorizontalDivider(
                         modifier = Modifier.padding(start = 68.dp),
                         thickness = 0.5.dp,
-                        color = Color(0xFFE5E5EA),
+                        color = DebugDividerColor,
                     )
                 }
             }
@@ -307,21 +310,21 @@ fun DebugUiToolsSubMenu(
                     title = "Dynamic Type",
                     subtitle = "Current: ${dynamicType.label}",
                     icon = R.drawable.ic_edit_profile,
-                    iconBackgroundColor = Color(0xFFAF52DE),
+                    iconBackgroundColor = DebugColors.AccentPurple,
                     action = DebuggerActions.DynamicType,
                 ),
                 DebugMenuItemModel(
                     title = "Animation Speed",
                     subtitle = "Current: ${formatAnimationSpeed(animationSpeed)}",
                     icon = R.drawable.ic_timer,
-                    iconBackgroundColor = Color(0xFFFFCC00),
+                    iconBackgroundColor = DebugColors.Warning,
                     action = DebuggerActions.AnimationSpeed,
                 ),
                 DebugMenuItemModel(
                     title = "Layout Grid Overlay",
                     subtitle = if (gridEnabled) "8pt grid visible" else "8pt grid drawn over all UI",
                     icon = R.drawable.ic_debug_grid,
-                    iconBackgroundColor = Color(0xFFFF2D55),
+                    iconBackgroundColor = DebugColors.AccentRed,
                     action = DebuggerActions.LayoutGridOverlay,
                     isToggle = true,
                 ),
@@ -329,7 +332,7 @@ fun DebugUiToolsSubMenu(
                     title = "Screen Size Simulator",
                     subtitle = screenPreset?.displayName ?: "Preview layout on different screen sizes",
                     icon = R.drawable.ic_debug_phone,
-                    iconBackgroundColor = Color(0xFF007AFF),
+                    iconBackgroundColor = DebugColors.AccentBlue,
                     action = DebuggerActions.ScreenSizeSimulator,
                 ),
             ),
@@ -366,7 +369,7 @@ fun DebugDeviceSimulationSubMenu(
                         "Override device GPS location"
                     },
                     icon = R.drawable.ic_debug_location,
-                    iconBackgroundColor = Color(0xFF007AFF),
+                    iconBackgroundColor = DebugColors.AccentBlue,
                     action = DebuggerActions.LocationSpoofer,
                 ),
             ),
@@ -385,7 +388,8 @@ fun DynamicTypePickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { TitleMediumText(text = "Dynamic Type",overrideColor = MaterialTheme.colorScheme.onSurface) },
+        containerColor = DebugColors.Surface,
+        title = { TitleMediumText(text = "Dynamic Type", overrideColor = DebugTitleColor) },
         text = {
             Column {
                 DynamicTypeLevel.entries.forEach { level ->
@@ -432,7 +436,8 @@ fun AnimationSpeedPickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { TitleMediumText(text = "Animation Speed",overrideColor = MaterialTheme.colorScheme.onSurface) },
+        containerColor = DebugColors.Surface,
+        title = { TitleMediumText(text = "Animation Speed", overrideColor = DebugTitleColor) },
         text = {
             Column {
                 BodySmallText(
@@ -490,12 +495,13 @@ fun ScreenSizeSimulatorDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = DebugColors.Surface,
         title = {
             Column {
                 TitleMediumText(
                     text = "Screen Size Simulator",
                     fontWeight = FontWeight.SemiBold,
-                    overrideColor = MaterialTheme.colorScheme.onSurface,
+                    overrideColor = DebugTitleColor,
                 )
                 BodySmallText(
                     text = "Wraps your app in a container sized to the selected device so layout reflows accurately",
@@ -583,7 +589,7 @@ fun ScreenSizeSimulatorDialog(
                 if (customError != null) {
                     BodySmallText(
                         text = customError.orEmpty(),
-                        overrideColor = Color(0xFFFF3B30),
+                        overrideColor = DebugColors.AccentRed,
                         modifier = Modifier.padding(start = 4.dp),
                     )
                 }
@@ -653,7 +659,8 @@ fun LocationSpooferDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { TitleMediumText(text = "Location Spoofer") },
+        containerColor = DebugColors.Surface,
+        title = { TitleMediumText(text = "Location Spoofer", overrideColor = DebugTitleColor) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -661,7 +668,7 @@ fun LocationSpooferDialog(
             ) {
                 BodySmallText(
                     text = if (enabled) "Spoofing active" else "Select a location to spoof",
-                    overrideColor = if (enabled) Color(0xFF34C759) else DebugSubtitleColor,
+                    overrideColor = if (enabled) DebugColors.Success else DebugSubtitleColor,
                 )
                 DebugUiToolsStore.locationPresets.forEach { preset ->
                     DebugSelectionChip(
@@ -703,14 +710,17 @@ private fun DebugSelectionChip(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(if (selected) Color(0xFFE8F0FE) else Color(0xFFF2F2F7))
+            .background(
+                if (selected) DebugColors.AccentBlue.copy(alpha = 0.18f)
+                else DebugColors.SurfaceElevated,
+            )
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         LabelMediumText(
             text = label,
             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            overrideColor = if (selected) Color(0xFF007AFF) else DebugTitleColor,
+            overrideColor = if (selected) DebugColors.AccentBlue else DebugTitleColor,
         )
     }
 }

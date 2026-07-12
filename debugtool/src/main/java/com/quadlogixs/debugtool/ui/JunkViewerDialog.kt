@@ -35,15 +35,29 @@ import com.quadlogixs.debugtool.ui.components.HorizontalLineDivider
 import com.quadlogixs.debugtool.R
 import com.quadlogixs.debugtool.ui.components.NoRecentFoundItem
 import com.quadlogixs.debugtool.ui.RecompositionLogStore
+import com.quadlogixs.debugtool.ui.theme.DebugColors
+import com.quadlogixs.debugtool.ui.theme.DebugToolTheme
 
 @Composable
 fun JunkViewerDialog(onDismissRequest: () -> Unit,viewModel:JankLogsViewModel = hiltViewModel()) {
+    DebugToolTheme {
+        JunkViewerDialogBody(onDismissRequest = onDismissRequest, viewModel = viewModel)
+    }
+}
+
+@Composable
+private fun JunkViewerDialogBody(
+    onDismissRequest: () -> Unit,
+    viewModel: JankLogsViewModel,
+) {
     val context = LocalContext.current
 
     var logs by remember { mutableStateOf(viewModel.getLogs()) }
     Dialog(onDismissRequest = onDismissRequest) {
         CardContainer(
             modifier = Modifier.fillMaxWidth(),
+            containerColor = DebugColors.Background,
+            borderColor = DebugColors.Border,
             content = {
                 Column(
                     modifier = Modifier
@@ -54,8 +68,8 @@ fun JunkViewerDialog(onDismissRequest: () -> Unit,viewModel:JankLogsViewModel = 
                     SpacerHeight(5.sdp)
                     Row {
                         TitleMediumText(
-                            text = "Junk Viewer",
-                            overrideColor = MaterialTheme.colorScheme.onPrimary
+                            text = "Jank Stats",
+                            overrideColor = DebugColors.AccentOrange
                         )
                         SpacerWeight(1f)
                         if (logs.isNotEmpty()) {

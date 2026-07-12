@@ -50,9 +50,18 @@ import com.quadlogixs.debugtool.ui.components.isValidJson
 import com.quadlogixs.debugtool.core.MockApiResponseStore
 import com.quadlogixs.debugtool.core.SavedMockResponse
 import com.quadlogixs.debugtool.R
+import com.quadlogixs.debugtool.ui.theme.DebugColors
+import com.quadlogixs.debugtool.ui.theme.DebugToolTheme
 
 @Composable
 fun MockApiResponsesDialog(onDismiss: () -> Unit) {
+    DebugToolTheme {
+        MockApiResponsesDialogBody(onDismiss = onDismiss)
+    }
+}
+
+@Composable
+private fun MockApiResponsesDialogBody(onDismiss: () -> Unit) {
     val mocks by MockApiResponseStore.mocks.collectAsState()
     val globalEnabled by MockApiResponseStore.globalEnabledFlow.collectAsState()
     var editingMock by remember { mutableStateOf<SavedMockResponse?>(null) }
@@ -71,6 +80,8 @@ fun MockApiResponsesDialog(onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         CardContainer(
             modifier = Modifier.fillMaxWidth(),
+            containerColor = DebugColors.Background,
+            borderColor = DebugColors.Border,
             content = {
                 Column(
                     modifier = Modifier
@@ -79,8 +90,8 @@ fun MockApiResponsesDialog(onDismiss: () -> Unit) {
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         TitleMediumText(
-                            text = "Saved API Mocks",
-                            overrideColor = MaterialTheme.colorScheme.onPrimary,
+                            text = "Response Mocker",
+                            overrideColor = DebugColors.AccentGreen,
                         )
                         SpacerWeight(1f)
                         ResourceImage(
