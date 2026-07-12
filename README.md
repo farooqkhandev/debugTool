@@ -40,25 +40,90 @@ No bridge packages in `:common` / `:data`. No copying FAB or menu UI from the sa
 
 ## Screenshots
 
+Dark professional UI (v1.0.5+) — FAB menu and core tools:
+
 <p align="center">
-  <img src="docs/images/debug-fab.png" width="220" alt="Floating bug FAB" />
+  <img src="docs/images/debugtool-menu-fab.png" width="200" alt="Debug Toolkit FAB menu" />
   &nbsp;
-  <img src="docs/images/debug-menu-overview.png" width="220" alt="Debug Menu" />
-</p>
-
-<p align="center">
-  <em>Floating bug FAB → full Debug Menu (drag to reposition)</em>
-</p>
-
-<p align="center">
-  <img src="docs/images/debug-environment.png" width="220" alt="Environment Selector" />
+  <img src="docs/images/feature-change-environment.png" width="200" alt="Change Environment" />
   &nbsp;
-  <img src="docs/images/debug-report-issue.png" width="220" alt="Report Issue" />
+  <img src="docs/images/feature-scan-qr.png" width="200" alt="Scan QR Code" />
 </p>
 
 <p align="center">
-  <em>Environment switcher · Azure Report Issue (assignees from your host)</em>
+  <em>Teal FAB menu · Environment switcher · QR / config import</em>
 </p>
+
+<p align="center">
+  <img src="docs/images/feature-report-bug.png" width="200" alt="Report Bug" />
+  &nbsp;
+  <img src="docs/images/feature-halt-edit-api.png" width="200" alt="Halt & Edit API" />
+  &nbsp;
+  <img src="docs/images/feature-network-trace.png" width="200" alt="Network Trace" />
+</p>
+
+<p align="center">
+  <em>Azure Report Bug · Halt & Edit API · Network Trace</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/feature-response-mocker.png" width="200" alt="Response Mocker" />
+  &nbsp;
+  <img src="docs/images/feature-api-performance.png" width="200" alt="API Performance" />
+  &nbsp;
+  <img src="docs/images/feature-block-all-requests.png" width="200" alt="Block All Requests" />
+</p>
+
+<p align="center">
+  <em>Response Mocker · API Performance · Block All Requests</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/feature-memory-usage.png" width="200" alt="Memory Usage" />
+  &nbsp;
+  <img src="docs/images/feature-recomposition-stats.png" width="200" alt="Recomposition Stats" />
+  &nbsp;
+  <img src="docs/images/feature-jank-stats.png" width="200" alt="Jank Stats" />
+</p>
+
+<p align="center">
+  <em>Memory · Recomposition · Jank</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/feature-local-logs.png" width="200" alt="Local Logs" />
+  &nbsp;
+  <img src="docs/images/debugtool-logcat.png" width="200" alt="Logcat" />
+  &nbsp;
+  <img src="docs/images/feature-crash-reports.png" width="200" alt="Crash Reports" />
+</p>
+
+<p align="center">
+  <em>Local Logs · Logcat · Crash Reports</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/feature-ui-tools.png" width="200" alt="UI Tools" />
+  &nbsp;
+  <img src="docs/images/feature-device-simulation.png" width="200" alt="Device Simulation" />
+  &nbsp;
+  <img src="docs/images/feature-encryption.png" width="200" alt="Encryption" />
+</p>
+
+<p align="center">
+  <em>UI Tools · Device Simulation · Encryption</em>
+</p>
+
+<details>
+<summary>More screens</summary>
+
+<p align="center">
+  <img src="docs/images/feature-remote-logs.png" width="200" alt="Remote Logs" />
+  &nbsp;
+  <img src="docs/images/debugtool-api-performance.png" width="200" alt="API Performance dashboard" />
+</p>
+
+</details>
 
 ---
 
@@ -66,17 +131,20 @@ No bridge packages in `:common` / `:data`. No copying FAB or menu UI from the sa
 
 | | Feature | Description |
 |---|---------|-------------|
-| 🐞 | **Report Bug** | File Azure DevOps work items with screenshot + assignees |
-| 📡 | **Network Trace** | Chucker inspector for requests / responses |
-| ✋ | **Halt & Edit API** | Intercept, edit, or block traffic live |
+| 🐞 | **Report Bug** | Azure DevOps work items with screenshot + assignees |
+| 📡 | **Network Trace** | Request / response inspector |
+| ✋ | **Halt & Edit API** | Intercept, edit, or drop traffic live |
+| 🚫 | **Block All Requests** | Kill-switch for outgoing network calls |
 | 🎭 | **Response Mocker** | Serve canned JSON without a backend |
-| ⚡ | **API Performance** | Per-request timing & speed stats |
+| ⚡ | **API Performance** | Latency, status, and endpoint stats |
 | 🌍 | **Change Environment** | Switch Dev / QA / UAT / Prod (or custom URLs) |
-| 📷 | **QR Inspector** | Scan or paste payment / config QR payloads |
+| 📷 | **Scan QR** | Camera or paste for config / payment QR |
 | 🧱 | **UI Tools** | Dynamic type, animation speed, layout grid, screen size |
-| 📍 | **Location Spoofer** | Mock GPS for map & geofence flows |
-| 💥 | **Crash / Logcat** | On-device crash history & local logs |
-| 🧠 | **Perf stats** | Memory, Compose recomposition, jank frames |
+| 📍 | **Device Simulation** | Mock GPS for map & geofence flows |
+| 🔐 | **Encryption toggle** | Flip request encryption from the menu |
+| 💥 | **Crash Reports** | On-device crash history with stack previews |
+| 📜 | **Local Logs / Logcat** | Filtered live log viewer |
+| 🧠 | **Memory / Recomposition / Jank** | Heap, Compose, and frame timing stats |
 
 ---
 
