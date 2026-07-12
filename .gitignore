@@ -34,5 +34,23 @@ Thumbs.db
 # Kotlin
 .kotlin/
 
-# Secrets — never commit tokens
+# Cursor (local agent rules/agents — do not push)
+.cursor/
+
+# Secrets — never commit tokens / credentials
 **/secrets.properties
+**/credentials.properties
+**/keystore.properties
+*.jks
+*.keystore
+*.pem
+*.p12
+.env
+.env.*
+!.env.example
+
+# Do not commit machine-local Gradle secrets (gpr.user / gpr.key / tokens).
+# Keep those only in ~/.gradle/gradle.properties (user home), not in this repo.
+gradle.properties.local
+**/local.gradle.properties
+*)
