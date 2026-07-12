@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.0.3-0D9488?style=for-the-badge" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.0.4-0D9488?style=for-the-badge" alt="version" />
   <img src="https://img.shields.io/badge/platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android" />
   <img src="https://img.shields.io/badge/Kotlin-Compose-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin" />
   <img src="https://img.shields.io/badge/license-Apache%202.0-blue?style=for-the-badge" alt="license" />
@@ -99,12 +99,14 @@ No bridge packages in `:common` / `:data`. No copying FAB or menu UI from the sa
 | [`debugtool-hooks`](https://jitpack.io/#farooqkhandev/debugTool) | `implementation(...)` | ✅ Yes — tiny no-ops |
 | [`debugtool`](https://jitpack.io/#farooqkhandev/debugTool) | `debugImplementation(...)` | ❌ Never |
 
-**Coordinates**
+**Coordinates** (declare **both** — `debugtool` does **not** pull hooks transitively):
 
 ```text
-com.github.farooqkhandev:debugtool-hooks:1.0.3
-com.github.farooqkhandev:debugtool:1.0.3
+com.github.farooqkhandev:debugtool-hooks:1.0.4
+com.github.farooqkhandev:debugtool:1.0.4
 ```
+
+> Always add hooks yourself — no `exclude { }` needed.
 
 ---
 
@@ -129,10 +131,11 @@ dependencyResolutionManagement {
 ```kotlin
 dependencies {
     // All build types — Host APIs + runtime hooks (no-op without full lib)
-    implementation("com.github.farooqkhandev:debugtool-hooks:1.0.3")
+    implementation("com.github.farooqkhandev:debugtool-hooks:1.0.4")
 
     // Debug builds only — FAB, menu, Chucker, Azure, overlays
-    debugImplementation("com.github.farooqkhandev:debugtool:1.0.3")
+    // (does not transitively include hooks — add hooks above)
+    debugImplementation("com.github.farooqkhandev:debugtool:1.0.4")
 }
 ```
 
@@ -341,7 +344,7 @@ Try the sample:
 ./gradlew :debugtool-hooks:publishToMavenLocal :debugtool:publishToMavenLocal
 ```
 
-Tag `1.0.3` on GitHub → [JitPack](https://jitpack.io/#farooqkhandev/debugTool) green → consume coordinates above.
+Tag `1.0.4` on GitHub → [JitPack](https://jitpack.io/#farooqkhandev/debugTool) green → consume coordinates above.
 
 ---
 

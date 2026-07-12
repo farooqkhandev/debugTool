@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4
+
+- `:debugtool` depends on hooks via `compileOnly` (not `api`) so the published POM does **not** pull hooks transitively.
+- Hosts must declare both artifacts explicitly — no `exclude { }` needed.
+- Version badge / docs updated for dual-artifact install.
+
 ## 1.0.3
 
 - New always-safe module `:debugtool-hooks` (`DebugToolHooks`, `DebugToolNetwork`, Host/Config APIs).

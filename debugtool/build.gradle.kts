@@ -106,7 +106,10 @@ publishing {
 }
 
 dependencies {
-    api(project(":debugtool-hooks"))
+    // Host apps must add debugtool-hooks themselves (implementation).
+    // compileOnly keeps hooks off the published POM so consumers never get a
+    // second/transitive hooks AAR (no exclude{} needed; avoids JitPack group clashes).
+    compileOnly(project(":debugtool-hooks"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

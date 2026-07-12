@@ -44,10 +44,9 @@ android {
 }
 
 dependencies {
-    // Full library + transitive hooks (debug only)
+    // Always-safe hooks on every variant; full toolkit debug-only (no transitive hooks).
+    implementation(project(":debugtool-hooks"))
     debugImplementation(project(":debugtool"))
-    // Always-safe hooks for release (no Chucker / menu)
-    releaseImplementation(project(":debugtool-hooks"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
