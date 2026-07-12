@@ -44,7 +44,10 @@ android {
 }
 
 dependencies {
-    implementation(project(":debugtool"))
+    // Full library + transitive hooks (debug only)
+    debugImplementation(project(":debugtool"))
+    // Always-safe hooks for release (no Chucker / menu)
+    releaseImplementation(project(":debugtool-hooks"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -57,6 +60,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.compose.hilt.navigation)
+    implementation(libs.androidx.compose.lifecycle)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

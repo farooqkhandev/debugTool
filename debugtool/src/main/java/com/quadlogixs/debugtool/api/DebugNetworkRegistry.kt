@@ -2,8 +2,16 @@ package com.quadlogixs.debugtool.api
 
 /**
  * Holds the active debug OkHttp contributor after [com.quadlogixs.debugtool.DebugTool.install].
- * The host app reads this and forwards into its own production bridge (e.g. `DebugNetworkBridge`).
+ *
+ * @deprecated Prefer [com.quadlogixs.debugtool.hooks.DebugToolNetwork] from `:debugtool-hooks`.
  */
+@Deprecated(
+    message = "Use DebugToolNetwork / DebugToolHooks from :debugtool-hooks",
+    replaceWith = ReplaceWith(
+        "DebugToolNetwork",
+        "com.quadlogixs.debugtool.hooks.DebugToolNetwork",
+    ),
+)
 object DebugNetworkRegistry {
 
     @Volatile
@@ -16,5 +24,6 @@ object DebugNetworkRegistry {
 
     fun clear() {
         contributor = DebugNetworkHooks { _, _ -> }
+        com.quadlogixs.debugtool.hooks.DebugToolHooks.clearNetworkContributor()
     }
 }

@@ -1,11 +1,10 @@
 # debugTool
 
-Standalone Android debug menu library (shake → floating bug icon → tools).
+Standalone Android debug menu library (floating bug FAB → tools).
 
-Add it with **`debugImplementation` only** so release builds stay clean.
-
-**Package:** `com.quadlogixs.debugtool`  
-**Repo:** https://github.com/farooqkhandev/debugTool
+**Package:** `com.quadlogixs.debugtool` / `com.quadlogixs.debugtool.hooks`  
+**Repo:** https://github.com/farooqkhandev/debugTool  
+**Version:** 1.1.0
 
 ---
 
@@ -16,163 +15,97 @@ Add it with **`debugImplementation` only** so release builds stay clean.
 - Environment switcher, encryption toggle
 - Crash logs, logcat viewer
 - UI tools: dynamic type, animation speed, layout grid, screen size simulator
-- GPS spoofer, memory / recomposition / jank stats
+- GPS spoofing, memory / recomposition / jank stats
 - QR debug scanner
+- Always-safe **hooks** module for release-safe runtime flags + OkHttp wiring
 
 ---
 
-## Quick start (use in your app)
+## Quick start
 
-### 1. Add JitPack
-
-`settings.gradle.kts`:
+### 1. JitPack + dependencies
 
 ```kotlin
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-        maven(url = "https://jitpack.io")
-    }
+// settings.gradle.kts — repositories
+maven(url = "https://jitpack.io")
+
+// app/build.gradle.kts
+implementation("com.github.farooqkhandev:debugtool-hooks:1.1.0") // all build types
+debugImplementation("com.github.farooqkhandev:debugtool:1.1.0")  // debug only
+```
+
+### 2. Implement `DebugToolHost` + install (debug)
+
+```kotlin
+class MyDebugToolHost(...) : DebugToolHost { /* environments, deviceId, assignees, … */ }
+
+// Application.onCreate (debug)
+DebugTool.install(
+    application = this,
+    config = DebugToolConfig(
+        host = host,
+        azure = AzureDevOpsConfig(
+            organization = "your-org",
+            project = "your-project",
+            areaPath = "your-project",
+            patProvider = AzurePatProvider { System.getenv("AZURE_DEVOPS_PAT").orEmpty() },
+        ),
+        azureLabel = "your-project/debugTool",
+    ),
+)
+```
+
+### 3. Wrap UI with `DebugToolScaffold`
+
+```kotlin
+DebugToolScaffold {
+    AppContent()
 }
 ```
 
-### 2. Add the dependency
+Always-visible draggable FAB + menus/dialogs. Optional `revealMode` reserved for shake-to-reveal later.
 
-`app/build.gradle.kts`:
-
-```kotlin
-debugImplementation("com.github.farooqkhandev:debugtool:1.0.1")
-```
-
-> Use **`debugImplementation`**, never `implementation`.
-
-If Gradle cannot resolve the artifact, open https://jitpack.io/#farooqkhandev/debugTool and wait for tag `1.0.1` to turn green, or publish locally:
-
-```bash
-./gradlew :debugtool:publishToMavenLocal
-```
-
-Then add `mavenLocal()` to your repositories.
-
-### 3. Implement `DebugToolHost`
-
-Provide app-specific settings (environments, device id, encryption, version):
+### 4. Wire OkHttp
 
 ```kotlin
-class MyDebugToolHost(
-    private val prefs: SharedPreferences,
-) : DebugToolHost {
-
-    override fun environments() = listOf(
-        DebugEnvironment("Dev", "https://dev.example.com"),
-        DebugEnvironment("QA", "https://qa.example.com"),
-    )
-
-    override suspend fun currentEnvironment(): String =
-        prefs.getString("env_url", environments().first().url).orEmpty()
-
-    override suspend fun applyEnvironment(url: String) {
-        prefs.edit().putString("env_url", url).apply()
-    }
-
-    override fun appVersionName(): String = BuildConfig.VERSION_NAME
-    override fun flavorName(): String = BuildConfig.FLAVOR
-    override fun deviceId(): String = /* your device id */
-
-    override fun isEncryptionEnabled(context: Context): Boolean = true
-    override suspend fun setEncryptionEnabled(context: Context, enabled: Boolean) { /* optional */ }
-
-    // Team members for Report Issue → Assigned To
-    override fun assignees() = listOf(
-        AssignedTo(name = "Farooq Khan", emailAddress = "farooq.khan@appinsnap.com"),
-        AssignedTo(name = "Team Member", emailAddress = "member@example.com"),
-    )
-}
+OkHttpClient.Builder()
+    .addDebugToolInterceptors(context) // DebugToolNetwork extension
+    .build()
 ```
 
-See the full sample in `:app` → `SampleDebugToolHost`.
-
-### 4. Install at app startup
+### 5. Read runtime hooks (any module / release-safe)
 
 ```kotlin
-class MyApplication : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        if (BuildConfig.DEBUG) {
-            val host = MyDebugToolHost(/* ... */)
-            DebugToolBootstrap.install(
-                application = this,
-                config = DebugToolConfig(
-                    host = host,
-                    azure = AzureDevOpsConfig(
-                        organization = "your-org",
-                        project = "your-project",
-                        areaPath = "your-project",
-                        patProvider = AzurePatProvider {
-                            System.getenv("AZURE_DEVOPS_PAT").orEmpty()
-                        },
-                    ),
-                    // Optional fallback if host.assignees() is empty
-                    azureLabel = "your-project/debugTool",
-                ),
-            )
-        }
-    }
-}
+val scale = rememberDebugDynamicTypeScale()
+val duration = DebugToolHooks.navAnimationDurationMillis(baseMs = 300)
+val mockGps = DebugToolHooks.mockLocation()
 ```
 
-### 5. Show the menu (Compose)
+Nav animation duration is exposed **via hooks only** in this iteration (`DebugToolHooks.navAnimationDurationMillis(base)`).
 
-Copy the floating bug icon + dialog wiring from the sample:
+---
 
-`app/src/main/java/.../sample/MainActivity.kt`
+## Migration from v1.0.x
 
-Typical flow:
+| Before (1.0.x) | After (1.1.0) |
+|----------------|---------------|
+| `debugImplementation("…:debugtool:…")` only | Add `implementation("…:debugtool-hooks:1.1.0")` for all variants |
+| Copy FAB + dialogs from sample `MainActivity` | Use `DebugToolScaffold { … }` |
+| `DebugNetworkRegistry.contributor.contribute(…)` | `builder.addDebugToolInterceptors(context)` / `DebugToolNetwork.interceptor(context)` |
+| `DebugRuntimeRegistry.get()` | `DebugToolHooks` (typography, mock GPS, halt, nav duration, …) |
+| Host/Config in `:debugtool` | Host/Config live in `:debugtool-hooks` (`com.quadlogixs.debugtool.api`) |
 
-1. Optional: start `ShakeDetector` to toggle the icon / open Chucker  
-2. Show a floating bug FAB  
-3. On tap → `ShowDebugToolMenuDialog` and feature dialogs  
-
-### 6. Hook OkHttp (network tools)
-
-After `DebugToolBootstrap.install(...)`, add debug interceptors when building OkHttp:
-
-```kotlin
-if (BuildConfig.DEBUG) {
-    DebugNetworkRegistry.contributor.contribute(interceptors, context)
-}
-```
-
-Order inside the library: **Mock → Halt → Chucker → ApiSpeed**.
-
-### 7. (Optional) Connect runtime hooks
-
-If you want dynamic type, mock GPS, loader suppression, or nav animation speed in your own UI modules **without** importing debugTool there:
-
-1. Keep a small no-op bridge in your shared module (e.g. `DebugRuntimeHolder`)
-2. In `app` debug code, forward `DebugRuntimeRegistry` into that bridge after install
-
-Minimal pattern:
-
-```kotlin
-DebugRuntimeRegistry.get()?.let { hooks ->
-    // install into your app’s DebugRuntimeHolder
-}
-```
-
-See `DebugRuntimeHooks` / `DebugRuntimeRegistry` in `com.quadlogixs.debugtool.api`.
+`DebugRuntimeRegistry` and `DebugNetworkRegistry` remain **deprecated but functional** after `DebugTool.install`.
 
 ---
 
 ## Try the sample app
 
-This repo includes `:app` as a working host.
-
-1. Open the `debugTool` project in Android Studio  
-2. Run `:app`  
+1. Open this project in Android Studio  
+2. Run `:app` (debug)  
 3. Tap the floating bug icon  
+
+Release compile of `:app` uses hooks-only (no full menu).
 
 ---
 
@@ -180,15 +113,9 @@ This repo includes `:app` as a working host.
 
 | Module | Purpose |
 |--------|---------|
-| `:debugtool` | Publishable library |
-| `:app` | Sample host (reference integration) |
-
-| Package | Contents |
-|---------|----------|
-| `api` | `DebugToolHost`, `DebugToolConfig`, registries |
-| `bootstrap` | `DebugToolBootstrap.install()` |
-| `core` | Interceptors, stores, crash handler, Azure API |
-| `ui` | Compose menus and dialogs |
+| `:debugtool-hooks` | Always-safe Host/Config + `DebugToolHooks` + `DebugToolNetwork` |
+| `:debugtool` | Full debug UI, Chucker, Azure, install (`api` → hooks) |
+| `:app` | Sample host |
 
 ---
 
@@ -196,44 +123,20 @@ This repo includes `:app` as a working host.
 
 | Do | Don’t |
 |----|--------|
-| `debugImplementation("…:debugtool:…")` | `implementation(...)` |
-| Install only in debug / `app` wiring | Import the library from production feature modules if you can avoid it |
-| Set `AZURE_DEVOPS_PAT` for bug reports | Hardcode PATs in source |
-| Call `DebugNetworkRegistry.contributor.contribute(...)` for network tools | Expect Chucker/mock/halt without OkHttp wiring |
-
----
-
-## Azure bug reports
-
-```bash
-# Windows
-set AZURE_DEVOPS_PAT=your_token_here
-
-# macOS / Linux
-export AZURE_DEVOPS_PAT=your_token_here
-```
-
-Pass org / project / area path via `AzureDevOpsConfig` when building `DebugToolConfig`.
+| `implementation(hooks)` + `debugImplementation(debugtool)` | Ship full `debugtool` in release |
+| Use `DebugToolScaffold` | Re-copy FAB wiring from old samples |
+| `addDebugToolInterceptors` | Expect Chucker/mock/halt without OkHttp wiring |
+| Set `AZURE_DEVOPS_PAT` for bug reports | Hardcode PATs |
 
 ---
 
 ## Publish (maintainers)
 
-1. Push to GitHub  
-2. Create a release tag (e.g. `1.0.1`)  
-3. Build on https://jitpack.io → wait for green  
-4. Consumers use:
-
-```kotlin
-debugImplementation("com.github.farooqkhandev:debugtool:1.0.1")
-```
-
-Local check before tagging:
-
 ```bash
-./gradlew :debugtool:assembleRelease
-./gradlew :debugtool:publishToMavenLocal
+./gradlew :debugtool-hooks:publishToMavenLocal :debugtool:publishToMavenLocal
 ```
+
+Tag `1.1.0` on GitHub → wait for JitPack green → consume as above.
 
 ---
 
@@ -241,9 +144,8 @@ Local check before tagging:
 
 | Problem | Fix |
 |---------|-----|
-| Dependency not found | Wait for JitPack green build, or use `mavenLocal()` |
-| No bug icon | Debug build + sample FAB / shake wiring |
-| Chucker / mock / halt missing | Call `DebugNetworkRegistry.contributor.contribute(...)` on OkHttp |
-| Dynamic type / mock location unused | Forward `DebugRuntimeRegistry` into your app bridge |
-| Bug report fails | Set `AZURE_DEVOPS_PAT` and valid Azure config |
-| Duplicate Chucker classes | Don’t also add `library-no-op` on the same classpath; prefer one Chucker artifact |
+| Dependency not found | Wait for JitPack, or `mavenLocal()` after publishToMavenLocal |
+| No bug icon | Debug build + `DebugToolScaffold` + `DebugTool.install` |
+| Network tools missing | Call `addDebugToolInterceptors` |
+| Dynamic type unused | Read `DebugToolHooks.typographyScale` / `rememberDebugDynamicTypeScale()` |
+| Bug report fails | Set `AZURE_DEVOPS_PAT` + valid Azure config |

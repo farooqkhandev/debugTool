@@ -2,8 +2,16 @@ package com.quadlogixs.debugtool.api
 
 /**
  * Holds the active [DebugRuntimeHooks] after [com.quadlogixs.debugtool.DebugTool.install].
- * The host app reads this and forwards hooks into its own production bridge (e.g. `DebugRuntimeHolder`).
+ *
+ * @deprecated Prefer [com.quadlogixs.debugtool.hooks.DebugToolHooks] from `:debugtool-hooks`.
  */
+@Deprecated(
+    message = "Use DebugToolHooks from :debugtool-hooks",
+    replaceWith = ReplaceWith(
+        "DebugToolHooks",
+        "com.quadlogixs.debugtool.hooks.DebugToolHooks",
+    ),
+)
 object DebugRuntimeRegistry {
 
     @Volatile
@@ -17,5 +25,6 @@ object DebugRuntimeRegistry {
 
     fun clear() {
         hooks = null
+        com.quadlogixs.debugtool.hooks.DebugToolHooks.clearRuntime()
     }
 }

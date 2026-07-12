@@ -1,78 +1,60 @@
-package com.quadlogixs.debugtool.sample
+package com.quadlogixs.debugtool.ui
 
-import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.quadlogixs.debugtool.R
+import com.quadlogixs.debugtool.api.DebugToolRegistry
 import com.quadlogixs.debugtool.core.DebugApiHalterChecker
 import com.quadlogixs.debugtool.core.getCrashCount
-import com.quadlogixs.debugtool.ui.ApiPerformanceTestDialog
-import com.quadlogixs.debugtool.ui.CrashLogViewer
-import com.quadlogixs.debugtool.ui.DebugIssueDialog
-import com.quadlogixs.debugtool.ui.DebugMenuMetadata
-import com.quadlogixs.debugtool.ui.DebuggerActions
-import com.quadlogixs.debugtool.ui.EnvironmentSwitcherDialog
-import com.quadlogixs.debugtool.ui.HaltApiDialog
-import com.quadlogixs.debugtool.ui.JunkViewerDialog
-import com.quadlogixs.debugtool.ui.LogcatDialog
-import com.quadlogixs.debugtool.ui.MemoryUsageViewer
-import com.quadlogixs.debugtool.ui.MockApiResponsesDialog
-import com.quadlogixs.debugtool.ui.QrDebugScanDialog
-import com.quadlogixs.debugtool.ui.RecompositionViewer
-import com.quadlogixs.debugtool.ui.ShowDebugToolMenuDialog
 import com.quadlogixs.debugtool.ui.components.ResourceImage
 import com.quadlogixs.debugtool.ui.components.safeClickable
-import com.quadlogixs.debugtool.ui.showDebugToast
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.runBlocking
 
-@AndroidEntryPoint
-class MainActivity : ComponentActivity() {
-
-    @Inject
-    lateinit var sampleHost: SampleDebugToolHost
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            MaterialTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    SampleScreen(host = sampleHost)
-                }
-            }
-        }
-    }
+/**
+ * How the debug FAB is revealed.
+ *
+ * [AlwaysVisibleFab] — default; draggable bug icon is always on screen.
+ * [ShakeToReveal] — reserved for a future shake-to-show FAB mode (currently same as always-visible).
+ */
+enum class DebugToolRevealMode {
+    AlwaysVisibleFab,
+    ShakeToReveal,
 }
 
+/**
+ * Host-app entry for the full debug UI: screen-size simulator, layout grid,
+ * always-visible draggable FAB, menu, and feature dialogs.
+ *
+ * Must be composed from a Hilt [ComponentActivity] (`@AndroidEntryPoint`) so
+ * dialog ViewModels resolve correctly.
+ */
 @Composable
-private fun SampleScreen(host: SampleDebugToolHost) {
-    val activity = androidx.compose.ui.platform.LocalContext.current as ComponentActivity
+fun DebugToolScaffold(
+    modifier: Modifier = Modifier,
+    revealMode: DebugToolRevealMode = DebugToolRevealMode.AlwaysVisibleFab,
+    routeTrail: String = "debug",
+    content: @Composable () -> Unit,
+) {
+    val context = LocalContext.current
+    val activity = context as? ComponentActivity
+
     var offset by remember { mutableStateOf(Offset(48f, 160f)) }
     var menuVisible by remember { mutableStateOf(false) }
     var isActive by remember { mutableStateOf(false) }
@@ -87,65 +69,71 @@ private fun SampleScreen(host: SampleDebugToolHost) {
     var showQr by remember { mutableStateOf(false) }
     var showMocks by remember { mutableStateOf(false) }
 
-    val crashCount = remember { getCrashCount(activity) }
+    val fabVisible = when (revealMode) {
+        DebugToolRevealMode.AlwaysVisibleFab -> true
+        // Future: hide until shake; keep always-visible for this iteration.
+        DebugToolRevealMode.ShakeToReveal -> true
+    }
+
+    val crashCount = remember(context) { getCrashCount(context) }
     val metadata = remember(crashCount) {
+        val host = if (DebugToolRegistry.isInstalled()) DebugToolRegistry.host else null
+        val config = if (DebugToolRegistry.isInstalled()) DebugToolRegistry.config else null
         DebugMenuMetadata(
-            appVersion = BuildConfig.VERSION_NAME,
-            // Prefer selected env title; ShowDebugToolMenuDialog also resolves this from DebugToolHost.
-            environmentName = host.environments().firstOrNull()?.title ?: host.flavorName(),
-            azureLabel = "sample/debugTool",
+            appVersion = host?.appVersionName().orEmpty(),
+            environmentName = host?.environments()?.firstOrNull()?.title
+                ?: host?.flavorName().orEmpty(),
+            azureLabel = config?.azureLabel.orEmpty(),
             crashCount = crashCount,
         )
     }
+    val isEncEnabled = remember(menuVisible) {
+        if (DebugToolRegistry.isInstalled()) {
+            DebugToolRegistry.host.isEncryptionEnabled(context)
+        } else {
+            false
+        }
+    }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = "debugTool Sample",
-                style = MaterialTheme.typography.headlineMedium,
-            )
-            Text(
-                text = "Shake is optional. Tap the floating bug icon to open the debug menu.",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 12.dp),
-            )
+    Box(modifier = modifier.fillMaxSize()) {
+        DebugScreenSizeSimulatorFrame(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                content()
+                DebugLayoutGridOverlay()
+            }
         }
 
-        ResourceImage(
-            image = if (isActive) {
-                com.quadlogixs.debugtool.R.drawable.ic_bug_active
-            } else {
-                com.quadlogixs.debugtool.R.drawable.ic_bug
-            },
-            modifier = Modifier
-                .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
-                .size(48.dp)
-                .pointerInput(Unit) {
-                    detectDragGestures { change, dragAmount ->
-                        offset += dragAmount
-                        change.consume()
+        if (fabVisible) {
+            ResourceImage(
+                image = if (isActive) R.drawable.ic_bug_active else R.drawable.ic_bug,
+                modifier = Modifier
+                    .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
+                    .size(48.dp)
+                    .pointerInput(Unit) {
+                        detectDragGestures { change, dragAmount ->
+                            offset += dragAmount
+                            change.consume()
+                        }
                     }
-                }
-                .safeClickable { menuVisible = !menuVisible },
-        )
+                    .safeClickable { menuVisible = !menuVisible },
+            )
+        }
 
         HaltApiDialog()
 
         if (menuVisible) {
             ShowDebugToolMenuDialog(
                 haltAllEnabled = DebugApiHalterChecker.haltAllRequestResponseEnabled,
-                isEncEnable = host.isEncryptionEnabled(activity),
+                isEncEnable = isEncEnabled,
                 metadata = metadata,
                 onDismissRequest = { menuVisible = false },
                 onToggleEnc = { enabled ->
-                    runBlocking { host.setEncryptionEnabled(activity, enabled) }
-                    activity.showDebugToast("Encryption: $enabled (restart recommended)")
+                    if (DebugToolRegistry.isInstalled()) {
+                        runBlocking {
+                            DebugToolRegistry.host.setEncryptionEnabled(context, enabled)
+                        }
+                        context.showDebugToast("Encryption: $enabled (restart recommended)")
+                    }
                 },
                 onAction = { action ->
                     when (action) {
@@ -169,7 +157,7 @@ private fun SampleScreen(host: SampleDebugToolHost) {
                         DebuggerActions.Environments -> showEnv = true
                         DebuggerActions.ScanQRCode -> showQr = true
                         DebuggerActions.MockResponses -> showMocks = true
-                        else -> activity.showDebugToast("Action: $action")
+                        else -> context.showDebugToast("Action: $action")
                     }
                 },
             )
@@ -179,11 +167,13 @@ private fun SampleScreen(host: SampleDebugToolHost) {
         if (showMemory) MemoryUsageViewer(onDismissRequest = { showMemory = false })
         if (showRecomposition) RecompositionViewer(onDismissRequest = { showRecomposition = false })
         if (showJank) JunkViewerDialog(onDismissRequest = { showJank = false })
-        if (showLogcat) LogcatDialog(onDismiss = { showLogcat = false }, viewModel = hiltViewModel())
+        if (showLogcat && activity != null) {
+            LogcatDialog(onDismiss = { showLogcat = false }, viewModel = hiltViewModel())
+        }
         if (showApiPerf) ApiPerformanceTestDialog(onDismiss = { showApiPerf = false })
         if (showBug) {
             DebugIssueDialog(
-                routeTrail = "sample → MainActivity",
+                routeTrail = routeTrail,
                 onClickCallBack = { showBug = false },
             )
         }
@@ -192,7 +182,7 @@ private fun SampleScreen(host: SampleDebugToolHost) {
                 onDismiss = { showEnv = false },
                 restartApp = {
                     showEnv = false
-                    activity.showDebugToast("Environment updated")
+                    context.showDebugToast("Environment updated")
                 },
             )
         }

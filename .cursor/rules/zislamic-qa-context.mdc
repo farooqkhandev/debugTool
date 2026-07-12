@@ -1,0 +1,47 @@
+---
+description: ZIslamicApp QA context — modules, flows, and cross-verification with dev agent
+alwaysApply: true
+---
+
+# ZIslamicApp QA Context
+
+## App Under Test
+
+Multi-module Android wallet app (`:presentation`, `:domain`, `:data`, `:common`).
+
+## High-Risk Areas (Always Test)
+
+- **Auth** — login, OTP, PIN, session expiry, device change, biometric
+- **Payments / Send Money** — amount validation, double-submit, transaction state
+- **QR Payment / Merchant** — camera permissions, scan failures
+- **Card Management** — activation, issuance, sensitive card data
+- **Balance / Mini Statement** — show/hide balance, stale data, API failures
+- **Navigation** — deep links, back stack, shared ViewModel scope (`activitySharedHiltViewModel` vs graph-scoped)
+- **Network** — `BaseRepository.safeApiCall`, VPN check, offline, timeout (90s read)
+- **Localization** — Urdu (RTL/Jameel font) vs English (Outfit)
+
+## Cross-Verification Workflow
+
+After any `@android-principal` implementation, run `@android-qa-engineer` on the same changes before PR.
+
+| Step | Agent | Action |
+|------|-------|--------|
+| 1 | `@android-principal` | Implement feature/fix |
+| 2 | `@android-qa-engineer` | Independent QA validation (all 7 phases) |
+| 3 | `@android-code-reviewer` | Architecture/code review |
+| 4 | Release decision | QA Release Decision gates merge |
+
+Dev and QA agents are **independent**. QA must not defer to dev assumptions.
+
+## API Testing Notes
+
+- Dynamic endpoints via `UrlProvider` / `EndPointsKey`
+- Errors via `ResponseStates.Failure` — verify user-facing messages use `getStringLocale()`
+- Interceptors handle auth headers — verify session expiry paths
+
+## Regression Hotspots
+
+- Dashboard (`DashboardNavigation.kt`, `DashboardViewModel`)
+- Bottom tab navigation (`BottomTabs`)
+- Shared ViewModels across features (SendMoney, Payment, Telco, Auth)
+- `savedStateHandle` / `ParamUtils` navigation args

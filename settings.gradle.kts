@@ -16,5 +16,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "debugTool"
+include(":debugtool-hooks")
 include(":debugtool")
 include(":app")

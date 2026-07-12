@@ -3,6 +3,7 @@ package com.quadlogixs.debugtool.core.runtime
 import com.quadlogixs.debugtool.api.DebugRuntimeHooks
 import com.quadlogixs.debugtool.core.DebugApiHalterChecker
 import com.quadlogixs.debugtool.core.DebugUiToolsStore
+import com.quadlogixs.debugtool.hooks.DebugHooksRuntime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -12,7 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-class AppDebugRuntime : DebugRuntimeHooks {
+class AppDebugRuntime : DebugRuntimeHooks, DebugHooksRuntime {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val _typographyScale = MutableStateFlow(1f)
 
