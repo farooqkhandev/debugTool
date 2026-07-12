@@ -43,26 +43,15 @@ import com.quadlogixs.debugtool.core.clearCrashLogs
 import com.quadlogixs.debugtool.core.getCrashLogs
 import com.quadlogixs.debugtool.R
 import com.quadlogixs.debugtool.ui.components.NoRecentFoundItem
-import com.quadlogixs.debugtool.ui.theme.DebugColors
-import com.quadlogixs.debugtool.ui.theme.DebugToolTheme
 
 @Composable
 fun CrashLogViewer(onDismissRequest: () -> Unit) {
-    DebugToolTheme {
-        CrashLogViewerBody(onDismissRequest = onDismissRequest)
-    }
-}
-
-@Composable
-private fun CrashLogViewerBody(onDismissRequest: () -> Unit) {
     val context = LocalContext.current
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     var crashLogs by remember { mutableStateOf(getCrashLogs(context).takeIf { it.length>50 }?.split("CRASH_ENDS")?: listOf()) }
     Dialog(onDismissRequest = onDismissRequest) {
         CardContainer(
             modifier = Modifier.fillMaxWidth(),
-            containerColor = DebugColors.Background,
-            borderColor = DebugColors.Border,
             content = {
                 Column(
                     modifier = Modifier
@@ -74,8 +63,8 @@ private fun CrashLogViewerBody(onDismissRequest: () -> Unit) {
                     SpacerHeight(5.sdp)
                     Row {
                         TitleMediumText(
-                            text = "Crash Reports",
-                            overrideColor = DebugColors.AccentOrange
+                            text = "Crash Logs",
+                            overrideColor = MaterialTheme.colorScheme.onPrimary
                         )
                         SpacerWeight(1f)
                         if (crashLogs.isNotEmpty()) {

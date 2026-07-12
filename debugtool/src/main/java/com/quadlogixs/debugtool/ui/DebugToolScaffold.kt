@@ -1,26 +1,22 @@
 package com.quadlogixs.debugtool.ui
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.activity.ComponentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.quadlogixs.debugtool.R
 import com.quadlogixs.debugtool.api.DebugToolRegistry
@@ -28,8 +24,6 @@ import com.quadlogixs.debugtool.core.DebugApiHalterChecker
 import com.quadlogixs.debugtool.core.getCrashCount
 import com.quadlogixs.debugtool.ui.components.ResourceImage
 import com.quadlogixs.debugtool.ui.components.safeClickable
-import com.quadlogixs.debugtool.ui.theme.DebugColors
-import com.quadlogixs.debugtool.ui.theme.DebugToolTheme
 import kotlin.math.roundToInt
 import kotlinx.coroutines.runBlocking
 
@@ -58,23 +52,6 @@ fun DebugToolScaffold(
     routeTrail: String = "debug",
     content: @Composable () -> Unit,
 ) {
-    DebugToolTheme {
-        DebugToolScaffoldContent(
-            modifier = modifier,
-            revealMode = revealMode,
-            routeTrail = routeTrail,
-            content = content,
-        )
-    }
-}
-
-@Composable
-private fun DebugToolScaffoldContent(
-    modifier: Modifier,
-    revealMode: DebugToolRevealMode,
-    routeTrail: String,
-    content: @Composable () -> Unit,
-) {
     val context = LocalContext.current
     val activity = context as? ComponentActivity
 
@@ -94,6 +71,7 @@ private fun DebugToolScaffoldContent(
 
     val fabVisible = when (revealMode) {
         DebugToolRevealMode.AlwaysVisibleFab -> true
+        // Future: hide until shake; keep always-visible for this iteration.
         DebugToolRevealMode.ShakeToReveal -> true
     }
 
@@ -126,10 +104,11 @@ private fun DebugToolScaffoldContent(
         }
 
         if (fabVisible) {
-            Surface(
+            ResourceImage(
+                image = if (isActive) R.drawable.ic_bug_active else R.drawable.ic_bug,
                 modifier = Modifier
                     .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
-                    .size(56.dp)
+                    .size(48.dp)
                     .pointerInput(Unit) {
                         detectDragGestures { change, dragAmount ->
                             offset += dragAmount
@@ -137,21 +116,7 @@ private fun DebugToolScaffoldContent(
                         }
                     }
                     .safeClickable { menuVisible = !menuVisible },
-                shape = CircleShape,
-                color = if (isActive) DebugColors.AccentRed else DebugColors.AccentTeal,
-                shadowElevation = 6.dp,
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    ResourceImage(
-                        image = if (isActive) R.drawable.ic_bug_active else R.drawable.ic_bug,
-                        modifier = Modifier.size(28.dp),
-                        colorFilter = ColorFilter.tint(DebugColors.TextPrimary),
-                    )
-                }
-            }
+            )
         }
 
         HaltApiDialog()

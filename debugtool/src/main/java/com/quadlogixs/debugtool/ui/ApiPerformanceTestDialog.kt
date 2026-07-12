@@ -49,24 +49,12 @@ import com.quadlogixs.debugtool.ui.showDebugToast
 import com.quadlogixs.debugtool.ui.components.textSdp
 import com.quadlogixs.debugtool.ui.components.HorizontalLineDivider
 import com.quadlogixs.debugtool.R
-import com.quadlogixs.debugtool.ui.theme.DebugColors
-import com.quadlogixs.debugtool.ui.theme.DebugToolTheme
 
 
 @Composable
 fun ApiPerformanceTestDialog(
     onDismiss: () -> Unit,
     viewModel: ApiPerformanceViewModel = hiltViewModel()
-) {
-    DebugToolTheme {
-        ApiPerformanceTestDialogBody(onDismiss = onDismiss, viewModel = viewModel)
-    }
-}
-
-@Composable
-private fun ApiPerformanceTestDialogBody(
-    onDismiss: () -> Unit,
-    viewModel: ApiPerformanceViewModel,
 ) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
@@ -80,8 +68,6 @@ private fun ApiPerformanceTestDialogBody(
     Dialog(onDismissRequest = onDismiss) {
         CardContainer(
             modifier = Modifier.fillMaxWidth(),
-            containerColor = DebugColors.Background,
-            borderColor = DebugColors.Border,
             content = {
                 Column(
                     modifier = Modifier
@@ -91,8 +77,8 @@ private fun ApiPerformanceTestDialogBody(
                     // Header Row
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         TitleMediumText(
-                            text = "API Performance",
-                            overrideColor = DebugColors.AccentTeal
+                            text = "API Performance Test",
+                            overrideColor = MaterialTheme.colorScheme.onPrimary
                         )
                         SpacerWeight(1f)
                         ResourceImage(
@@ -130,9 +116,9 @@ private fun ApiPerformanceTestDialogBody(
                                         .padding(vertical = 3.dp),
                                     colors = CardDefaults.cardColors(
                                         containerColor = when {
-                                            record.duration < 1500 -> DebugColors.AccentGreen.copy(alpha = 0.2f)
-                                            record.duration < 2000 -> DebugColors.Warning.copy(alpha = 0.2f)
-                                            else -> DebugColors.AccentRed.copy(alpha = 0.2f)
+                                            record.duration < 1500 -> Color(0xFFB2FF59)
+                                            record.duration < 2000 -> Color(0xFFFFF176)
+                                            else -> Color(0xFFFF8A80)
                                         }
                                     )
                                 ) {

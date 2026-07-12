@@ -56,11 +56,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import com.quadlogixs.debugtool.api.AssignedTo
 import com.quadlogixs.debugtool.R
-import com.quadlogixs.debugtool.ui.theme.DebugColors
 import com.quadlogixs.debugtool.ui.theme.LocalExtraThemeColors
 
 val SpaceDefault: Dp = 8.dp
@@ -249,7 +246,7 @@ fun TitleMediumText(
 fun CardContainer(
     modifier: Modifier = Modifier,
     horizontalPadding: Dp = 0.dp,
-    containerColor: Color = MaterialTheme.colorScheme.surface,
+    containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
     borderColor: Color = MaterialTheme.colorScheme.outline,
     contentAlignment: Alignment = Alignment.TopStart,
     onClick: (() -> Unit)? = null,
@@ -350,7 +347,7 @@ fun TextInputFieldApp(
                 text = fieldLabel,
                 fontSize = labelTextSize,
                 fontWeight = FontWeight.Bold,
-                overrideColor = DebugColors.AccentTeal,
+                overrideColor = MaterialTheme.colorScheme.onPrimary,
             )
             SpacerHeight(6.dp)
         }
@@ -362,16 +359,7 @@ fun TextInputFieldApp(
             onValueChange = onValueChange,
             enabled = enabled,
             readOnly = readOnly,
-            placeholder = if (placeholder.isNotBlank()) {
-                ({
-                    Text(
-                        text = placeholder,
-                        color = DebugColors.TextSecondary,
-                    )
-                })
-            } else {
-                null
-            },
+            placeholder = if (placeholder.isNotBlank()) ({ Text(placeholder) }) else null,
             singleLine = singleLine,
             minLines = minLines,
             maxLines = maxLines,
@@ -380,17 +368,6 @@ fun TextInputFieldApp(
             keyboardActions = KeyboardActions(onDone = { onDoneAction() }),
             leadingIcon = leading,
             trailingIcon = trailing,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = DebugColors.TextPrimary,
-                unfocusedTextColor = DebugColors.TextPrimary,
-                focusedBorderColor = DebugColors.AccentTeal,
-                unfocusedBorderColor = DebugColors.Border,
-                cursorColor = DebugColors.AccentTeal,
-                focusedContainerColor = DebugColors.SurfaceElevated,
-                unfocusedContainerColor = DebugColors.SurfaceElevated,
-                disabledBorderColor = DebugColors.Border,
-                disabledTextColor = DebugColors.TextSecondary,
-            ),
         )
         if (supportText.isNotBlank()) {
             SpacerHeight(4.dp)
@@ -423,30 +400,19 @@ fun BaseButton(
     primary: Boolean = true,
     enabled: Boolean = true,
     onClick: () -> Unit,
-    containerColor: Color = if (primary) DebugColors.AccentTeal else DebugColors.SurfaceElevated,
+    containerColor: Color = if (primary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
     borderColor: Color = Color.Unspecified,
-    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(10.dp),
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(8.dp),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     content: @Composable () -> Unit,
 ) {
-    val border = if (borderColor != Color.Unspecified) {
-        BorderStroke(1.dp, borderColor)
-    } else {
-        null
-    }
     Button(
         modifier = modifier,
         enabled = enabled,
         onClick = onClick,
         shape = shape,
         contentPadding = contentPadding,
-        border = border,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = containerColor,
-            contentColor = if (primary) DebugColors.OnAccent else DebugColors.TextPrimary,
-            disabledContainerColor = DebugColors.SurfaceElevated,
-            disabledContentColor = DebugColors.TextSecondary,
-        ),
+        colors = ButtonDefaults.buttonColors(containerColor = containerColor),
         content = { content() },
     )
 }
@@ -578,11 +544,7 @@ fun AssignToItem(
             .height(50.sdp)
             .safeClickable { onSelectItem(item) },
         shape = RoundedCornerShape(12.dp),
-        color = if (isChecked) DebugColors.SurfaceElevated else DebugColors.Surface,
-        border = BorderStroke(
-            width = 1.dp,
-            color = if (isChecked) DebugColors.AccentTeal else DebugColors.Border,
-        ),
+        color = MaterialTheme.colorScheme.primaryContainer,
     ) {
         Row(
             modifier = Modifier
@@ -594,20 +556,16 @@ fun AssignToItem(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(DebugColors.AccentTeal.copy(alpha = 0.25f)),
+                    .background(MaterialTheme.colorScheme.errorContainer),
                 contentAlignment = Alignment.Center,
             ) {
-                TitleMediumText(
-                    text = assigneeInitials(item.name),
-                    overrideColor = DebugColors.AccentTeal,
-                )
+                TitleMediumText(text = assigneeInitials(item.name))
             }
             SpacerWidth(10.sdp)
             TitleMediumText(
                 text = item.name,
                 maxLines = 1,
                 modifier = Modifier.weight(1f),
-                overrideColor = DebugColors.TextPrimary,
             )
             RadioButton(
                 selected = isChecked,

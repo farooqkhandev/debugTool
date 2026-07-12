@@ -1,11 +1,5 @@
 # Changelog
 
-## 1.0.5
-
-- Professional dark-mode UI redesign (`DebugToolTheme` / `DebugColors`) across FAB, menu, and feature screens.
-- Shared components (`CardContainer`, `BaseButton`, `TextInputFieldApp`) use dark debug palette instead of host light theme.
-- Accent-coded feature screens (teal / purple / green / orange / blue / red) aligned to mockups.
-
 ## 1.0.4
 
 - `:debugtool` depends on hooks via `compileOnly` (not `api`) so the published POM does **not** pull hooks transitively.

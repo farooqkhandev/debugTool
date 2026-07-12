@@ -51,21 +51,12 @@ import com.quadlogixs.debugtool.core.MockResponsePreset
 import com.quadlogixs.debugtool.core.SavedMockResponse
 import com.quadlogixs.debugtool.core.network.HaltInterceptResult
 import com.quadlogixs.debugtool.core.di.DebugApiHalter
-import com.quadlogixs.debugtool.ui.theme.DebugColors
-import com.quadlogixs.debugtool.ui.theme.DebugToolTheme
 import okhttp3.Headers
 import org.json.JSONArray
 import org.json.JSONObject
 
 @Composable
 fun HaltApiDialog() {
-    DebugToolTheme {
-        HaltApiDialogContent()
-    }
-}
-
-@Composable
-private fun HaltApiDialogContent() {
     val pending = DebugApiHalter.pending.collectAsState().value
     val context = LocalContext.current
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
@@ -82,10 +73,7 @@ private fun HaltApiDialogContent() {
                 Dialog(onDismissRequest = {}) {
                     CardContainer(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        containerColor = DebugColors.Background,
-                        borderColor = DebugColors.Border,
-                        content = {
+                            .fillMaxWidth(), content = {
                             Column(
                                 modifier = Modifier
                                     .padding(10.sdp)
@@ -93,8 +81,8 @@ private fun HaltApiDialogContent() {
                                 SpaceDefault()
                                 Row {
                                     TitleMediumText(
-                                        text = "Halt & Edit API",
-                                        overrideColor = DebugColors.AccentPurple
+                                        text = "Edit & Send Request",
+                                        overrideColor = MaterialTheme.colorScheme.onPrimary
                                     )
                                     SpacerWeight(1f)
                                     ResourceImage(
@@ -219,15 +207,15 @@ private fun HaltApiDialogContent() {
                                             BaseButton(
                                                 modifier = Modifier.height(30.dp),
                                                 primary = false,
-                                                containerColor = Color.Transparent,
-                                                borderColor = DebugColors.AccentPurple,
+                                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                borderColor = MaterialTheme.colorScheme.outline,
                                                 shape = MaterialTheme.shapes.small,
                                                 enabled = true,
                                                 content = {
                                                     LabelMediumText(
-                                                        text = "Resume",
+                                                        text = "Use Original",
                                                         fontSize = 12.textSdp,
-                                                        overrideColor = DebugColors.AccentPurple
+                                                        overrideColor = MaterialTheme.colorScheme.onTertiary
                                                     )
                                                 },
                                                 onClick = {
@@ -245,7 +233,7 @@ private fun HaltApiDialogContent() {
                                             BaseButton(
                                                 modifier = Modifier.height(30.dp),
                                                 primary = true,
-                                                containerColor = DebugColors.AccentPurple,
+                                                containerColor = MaterialTheme.colorScheme.secondary,
                                                 borderColor = Color.Unspecified,
                                                 shape = MaterialTheme.shapes.small,
                                                 enabled = true,
@@ -253,7 +241,7 @@ private fun HaltApiDialogContent() {
                                                     LabelMediumText(
                                                         text = "Proceed",
                                                         fontSize = 12.textSdp,
-                                                        overrideColor = DebugColors.TextPrimary
+                                                        overrideColor = MaterialTheme.colorScheme.background
                                                     )
                                                 },
                                                 onClick = {
@@ -293,10 +281,7 @@ private fun HaltApiDialogContent() {
                 Dialog(onDismissRequest = {}) {
                     CardContainer(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        containerColor = DebugColors.Background,
-                        borderColor = DebugColors.Border,
-                        content = {
+                            .fillMaxWidth(), content = {
                             Column(
                                 modifier = Modifier
                                     .padding(10.sdp)
@@ -305,8 +290,8 @@ private fun HaltApiDialogContent() {
                                 SpaceDefault()
                                 Row {
                                     TitleMediumText(
-                                        text = "Halt & Edit API",
-                                        overrideColor = DebugColors.AccentPurple
+                                        text = "Edit & Send Request",
+                                        overrideColor = MaterialTheme.colorScheme.onPrimary
                                     )
                                     SpacerWeight(1f)
                                     ResourceImage(
@@ -429,15 +414,15 @@ private fun HaltApiDialogContent() {
                                     BaseButton(
                                         modifier = Modifier.height(30.dp),
                                         primary = false,
-                                        containerColor = Color.Transparent,
-                                        borderColor = DebugColors.AccentPurple,
+                                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                        borderColor = MaterialTheme.colorScheme.outline,
                                         shape = MaterialTheme.shapes.small,
                                         enabled = true,
                                         content = {
                                             LabelMediumText(
-                                                text = "Resume",
+                                                text = "Use Original",
                                                 fontSize = 12.textSdp,
-                                                overrideColor = DebugColors.AccentPurple
+                                                overrideColor = MaterialTheme.colorScheme.onTertiary
                                             )
                                         },
                                         onClick = {
@@ -449,7 +434,7 @@ private fun HaltApiDialogContent() {
                                     BaseButton(
                                         modifier = Modifier.height(30.dp),
                                         primary = true,
-                                        containerColor = DebugColors.AccentPurple,
+                                        containerColor = MaterialTheme.colorScheme.secondary,
                                         borderColor = Color.Unspecified,
                                         shape = MaterialTheme.shapes.small,
                                         enabled = true,
@@ -457,7 +442,7 @@ private fun HaltApiDialogContent() {
                                             LabelMediumText(
                                                 text = "Proceed",
                                                 fontSize = 12.textSdp,
-                                                overrideColor = DebugColors.TextPrimary
+                                                overrideColor = MaterialTheme.colorScheme.background
                                             )
                                         },
                                         onClick = {

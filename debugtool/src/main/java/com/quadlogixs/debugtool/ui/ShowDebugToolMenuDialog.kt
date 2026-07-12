@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,9 +40,8 @@ import com.quadlogixs.debugtool.ui.components.LabelSmallText
 import com.quadlogixs.debugtool.ui.components.TitleLargeText
 import com.quadlogixs.debugtool.ui.components.ResourceImage
 import com.quadlogixs.debugtool.core.ApiSpeedTracker
+import com.quadlogixs.debugtool.core.DebugUiToolsStore
 import com.quadlogixs.debugtool.core.MockApiResponseStore
-import com.quadlogixs.debugtool.ui.theme.DebugColors
-import com.quadlogixs.debugtool.ui.theme.DebugToolTheme
 
 data class DebugMenuMetadata(
     val appVersion: String = "",
@@ -62,28 +62,6 @@ fun ShowDebugToolMenuDialog(
     haltAllEnabled: Boolean = false,
     isEncEnable: Boolean = false,
     metadata: DebugMenuMetadata = DebugMenuMetadata(),
-    onAction: (DebuggerActions) -> Unit,
-    onToggleEnc: (Boolean) -> Unit,
-    onDismissRequest: () -> Unit,
-) {
-    DebugToolTheme {
-        ShowDebugToolMenuDialogContent(
-            haltAllEnabled = haltAllEnabled,
-            isEncEnable = isEncEnable,
-            metadata = metadata,
-            onAction = onAction,
-            onToggleEnc = onToggleEnc,
-            onDismissRequest = onDismissRequest,
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ShowDebugToolMenuDialogContent(
-    haltAllEnabled: Boolean,
-    isEncEnable: Boolean,
-    metadata: DebugMenuMetadata,
     onAction: (DebuggerActions) -> Unit,
     onToggleEnc: (Boolean) -> Unit,
     onDismissRequest: () -> Unit,
@@ -138,7 +116,7 @@ private fun ShowDebugToolMenuDialogContent(
                     .width(36.dp)
                     .height(5.dp)
                     .clip(RoundedCornerShape(2.5.dp))
-                    .background(DebugColors.Border),
+                    .background(Color(0xFFD1D1D6)),
             )
         },
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
@@ -224,14 +202,14 @@ private fun DebugMenuHeader(
                 .align(Alignment.CenterStart)
                 .size(32.dp)
                 .clip(CircleShape)
-                .background(DebugCloseButtonBg)
+                .background(Color(0xFFE5E5EA))
                 .clickable(onClick = onDismissRequest),
             contentAlignment = Alignment.Center,
         ) {
             ResourceImage(
                 image = R.drawable.ic_close_receipt,
                 modifier = Modifier.size(14.dp),
-                colorFilter = ColorFilter.tint(DebugTitleColor),
+                colorFilter = ColorFilter.tint(DebugSubtitleColor),
             )
         }
 
@@ -242,20 +220,20 @@ private fun DebugMenuHeader(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             TitleLargeText(
-                text = "Debug Toolkit",
+                text = "🛠️ Debug Menu",
                 overrideColor = DebugTitleColor,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(4.dp))
             LabelSmallText(
-                text = "v${metadata.appVersion} · ${metadata.environmentName} Environment",
+                text = "aik v${metadata.appVersion} · ${metadata.environmentName} Environment",
                 overrideColor = DebugSubtitleColor,
                 textAlign = TextAlign.Center,
             )
             LabelSmallText(
                 text = "Azure: ${metadata.azureLabel}",
-                overrideColor = DebugColors.AccentTeal,
+                overrideColor = Color(0xFF34C759),
                 textAlign = TextAlign.Center,
             )
         }
@@ -298,14 +276,14 @@ private fun buildDebugMenuSections(
                 title = "Report Bug (Azure DevOps)",
                 subtitle = metadata.azureLabel,
                 icon = R.drawable.ic_bug_report,
-                iconBackgroundColor = DebugColors.AccentTeal,
+                iconBackgroundColor = Color(0xFFFF3B30),
                 action = DebuggerActions.ReportBug,
             ),
             DebugMenuItemModel(
                 title = "Crash Reports",
                 subtitle = "${metadata.crashCount} crash(es) saved",
                 icon = R.drawable.ic_crash,
-                iconBackgroundColor = DebugColors.AccentOrange,
+                iconBackgroundColor = Color(0xFFFF9500),
                 action = DebuggerActions.CrashReport,
             ),
         ),
@@ -317,21 +295,21 @@ private fun buildDebugMenuSections(
                 title = "Network Trace",
                 subtitle = "Open Chucker network inspector",
                 icon = R.drawable.ic_network_trace,
-                iconBackgroundColor = DebugColors.AccentBlue,
+                iconBackgroundColor = Color(0xFF007AFF),
                 action = DebuggerActions.NetworkTrace,
             ),
             DebugMenuItemModel(
                 title = "Halt & Edit API",
                 subtitle = "Intercept and modify requests",
                 icon = R.drawable.ic_api_halt,
-                iconBackgroundColor = DebugColors.AccentPurple,
+                iconBackgroundColor = Color(0xFFAF52DE),
                 action = DebuggerActions.HaltRequestResponse,
             ),
             DebugMenuItemModel(
                 title = "Block All Requests",
-                subtitle = if (haltAllEnabled) "Blocking all traffic" else "Passing through",
+                subtitle = if (haltAllEnabled) "🔴 Blocking all traffic" else "🟢 Passing through",
                 icon = R.drawable.ic_api_halt,
-                iconBackgroundColor = DebugColors.AccentRed,
+                iconBackgroundColor = Color(0xFFFF3B30),
                 action = DebuggerActions.HaltAllRequestResponse,
             ),
             DebugMenuItemModel(
@@ -342,7 +320,7 @@ private fun buildDebugMenuSections(
                     "No requests analyzed yet"
                 },
                 icon = R.drawable.ic_api_halt,
-                iconBackgroundColor = DebugColors.AccentTeal,
+                iconBackgroundColor = Color(0xFF32ADE6),
                 action = DebuggerActions.ApiPerformance,
             ),
             DebugMenuItemModel(
@@ -353,14 +331,14 @@ private fun buildDebugMenuSections(
                     "No active mocks"
                 },
                 icon = R.drawable.ic_api_halt,
-                iconBackgroundColor = DebugColors.AccentGreen,
+                iconBackgroundColor = Color(0xFF34C759),
                 action = DebuggerActions.MockResponses,
             ),
             DebugMenuItemModel(
                 title = "Encryption",
                 subtitle = if (isEncEnable) "Encryption enabled" else "Encryption disabled",
                 icon = R.drawable.ic_security,
-                iconBackgroundColor = DebugColors.AccentOrange,
+                iconBackgroundColor = Color(0xFFFF9500),
                 action = DebuggerActions.EncToggle,
                 isToggle = true,
             ),
@@ -373,14 +351,14 @@ private fun buildDebugMenuSections(
                 title = "UI Tools",
                 subtitle = "Dynamic Type, animations, grid, screen size",
                 icon = R.drawable.ic_debug_ui_tools,
-                iconBackgroundColor = DebugColors.AccentPurple,
+                iconBackgroundColor = Color(0xFFAF52DE),
                 action = DebuggerActions.UiTools,
             ),
             DebugMenuItemModel(
                 title = "Device Simulation",
                 subtitle = "Location spoofer",
                 icon = R.drawable.ic_debug_location,
-                iconBackgroundColor = DebugColors.AccentBlue,
+                iconBackgroundColor = Color(0xFF007AFF),
                 action = DebuggerActions.DeviceSimulation,
             ),
         ),
@@ -392,21 +370,21 @@ private fun buildDebugMenuSections(
                 title = "Memory Usage",
                 subtitle = "Live heap & allocation stats",
                 icon = R.drawable.ic_memory_usage,
-                iconBackgroundColor = DebugColors.AccentPurple,
+                iconBackgroundColor = Color(0xFF5856D6),
                 action = DebuggerActions.MemoryUsageStats,
             ),
             DebugMenuItemModel(
                 title = "Recomposition Stats",
                 subtitle = "Compose recomposition tracker",
                 icon = R.drawable.ic_recompose,
-                iconBackgroundColor = DebugColors.AccentBlue,
+                iconBackgroundColor = Color(0xFF007AFF),
                 action = DebuggerActions.RecompositionStats,
             ),
             DebugMenuItemModel(
                 title = "Jank Stats",
                 subtitle = "Frame timing & jank logs",
                 icon = R.drawable.ic_recompose,
-                iconBackgroundColor = DebugColors.AccentOrange,
+                iconBackgroundColor = Color(0xFFFF9500),
                 action = DebuggerActions.JunkStats,
             ),
         ),
@@ -418,14 +396,14 @@ private fun buildDebugMenuSections(
                 title = "Local Logs",
                 subtitle = "View on-device logcat",
                 icon = R.drawable.ic_logs,
-                iconBackgroundColor = DebugColors.SurfaceElevated,
+                iconBackgroundColor = Color(0xFF8E8E93),
                 action = DebuggerActions.LocalLogs,
             ),
             DebugMenuItemModel(
                 title = "Remote Logs",
                 subtitle = "Fetch server-side logs",
                 icon = R.drawable.ic_logs,
-                iconBackgroundColor = DebugColors.TextSecondary,
+                iconBackgroundColor = Color(0xFF636366),
                 action = DebuggerActions.RemoteLogs,
             ),
         ),
@@ -437,14 +415,14 @@ private fun buildDebugMenuSections(
                 title = "Change Environment",
                 subtitle = metadata.environmentName,
                 icon = R.drawable.ic_network_trace,
-                iconBackgroundColor = DebugColors.AccentTeal,
+                iconBackgroundColor = Color(0xFF007AFF),
                 action = DebuggerActions.Environments,
             ),
             DebugMenuItemModel(
                 title = "Scan QR Code",
                 subtitle = "Import debug configuration",
                 icon = R.drawable.ic_upload_qr,
-                iconBackgroundColor = DebugColors.AccentGreen,
+                iconBackgroundColor = Color(0xFF34C759),
                 action = DebuggerActions.ScanQRCode,
             ),
         ),

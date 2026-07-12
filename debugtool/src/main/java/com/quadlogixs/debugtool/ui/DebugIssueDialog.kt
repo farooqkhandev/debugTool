@@ -64,8 +64,6 @@ import com.quadlogixs.debugtool.ui.components.SpaceDefault
 import com.quadlogixs.debugtool.ui.components.AssignToItem
 import com.quadlogixs.debugtool.ui.showDebugToast
 import com.quadlogixs.debugtool.ui.theme.LocalExtraThemeColors
-import com.quadlogixs.debugtool.ui.theme.DebugColors
-import com.quadlogixs.debugtool.ui.theme.DebugToolTheme
 import com.quadlogixs.debugtool.core.domain.entity.LogIssueRequestEntity
 import com.quadlogixs.debugtool.core.domain.entity.UploadAttachmentRequestEntity
 import com.quadlogixs.debugtool.api.ResponseStates
@@ -79,22 +77,6 @@ fun DebugIssueDialog(
     onClickCallBack: () -> Unit = {},
     viewModel: DebugToolViewModel = hiltViewModel(),
     routeTrail: String = ""
-) {
-    DebugToolTheme {
-        DebugIssueDialogContent(
-            onClickCallBack = onClickCallBack,
-            viewModel = viewModel,
-            routeTrail = routeTrail,
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DebugIssueDialogContent(
-    onClickCallBack: () -> Unit,
-    viewModel: DebugToolViewModel,
-    routeTrail: String,
 ) {
     Timber.d("DebugIssueDialog")
 
@@ -140,10 +122,7 @@ private fun DebugIssueDialogContent(
                 .padding(horizontal = 10.sdp)
         ) {
             CardContainer(
-                modifier = Modifier.fillMaxSize(),
-                containerColor = DebugColors.Background,
-                borderColor = DebugColors.Border,
-                content = {
+                modifier = Modifier.fillMaxSize(), content = {
                     if (!showImageEditor) {
                         Column(
                             modifier = Modifier
@@ -158,8 +137,8 @@ private fun DebugIssueDialogContent(
                             ) {
                                 Row {
                                     TitleMediumText(
-                                        text = "Report Bug",
-                                        overrideColor = DebugColors.TextPrimary
+                                        text = "Report Issue",
+                                        overrideColor = MaterialTheme.colorScheme.onPrimary
                                     )
                                     SpacerWeight(1f)
                                     ResourceImage(
@@ -411,10 +390,9 @@ private fun DebugIssueDialogContent(
 
                             SpacerHeight(5.sdp)
                             TextButton(
-                                text = "Submit to Azure DevOps",
+                                text = "Send",
                                 enabled = description.isNotEmpty() && description.length >= 3,
                                 modifier = Modifier
-                                    .fillMaxWidth()
                                     .padding(1.sdp)
                                     .align(Alignment.CenterHorizontally)
                             ) {

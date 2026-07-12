@@ -31,26 +31,15 @@ import com.quadlogixs.debugtool.ui.components.HorizontalLineDivider
 import com.quadlogixs.debugtool.R
 import com.quadlogixs.debugtool.ui.components.NoRecentFoundItem
 import com.quadlogixs.debugtool.ui.RecompositionLogStore
-import com.quadlogixs.debugtool.ui.theme.DebugColors
-import com.quadlogixs.debugtool.ui.theme.DebugToolTheme
 
 @Composable
 fun RecompositionViewer(onDismissRequest: () -> Unit) {
-    DebugToolTheme {
-        RecompositionViewerBody(onDismissRequest = onDismissRequest)
-    }
-}
-
-@Composable
-private fun RecompositionViewerBody(onDismissRequest: () -> Unit) {
     val context = LocalContext.current
 
     val logs = remember { RecompositionLogStore.getLogs() }
     Dialog(onDismissRequest = onDismissRequest) {
         CardContainer(
             modifier = Modifier.fillMaxWidth(),
-            containerColor = DebugColors.Background,
-            borderColor = DebugColors.Border,
             content = {
                 Column(
                     modifier = Modifier
@@ -62,8 +51,8 @@ private fun RecompositionViewerBody(onDismissRequest: () -> Unit) {
                     SpacerHeight(5.sdp)
                     Row {
                         TitleMediumText(
-                            text = "Recomposition Stats",
-                            overrideColor = DebugColors.AccentBlue
+                            text = "Recomposition",
+                            overrideColor = MaterialTheme.colorScheme.onPrimary
                         )
                         SpacerWeight(1f)
                         ResourceImage(
