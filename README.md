@@ -170,10 +170,11 @@ Dark professional UI (v1.0.5+) — FAB menu and core tools:
 **Coordinates** (declare **both** — `debugtool` does **not** pull hooks transitively):
 
 ```text
-com.github.farooqkhandev:debugtool-hooks:1.0.5
-com.github.farooqkhandev:debugtool:1.0.5
+com.github.farooqkhandev.debugTool:debugtool-hooks:1.0.5
+com.github.farooqkhandev.debugTool:debugtool:1.0.5
 ```
 
+> JitPack multi-module group is `com.github.farooqkhandev.debugTool` (repo name in the group).  
 > Always add hooks yourself — no `exclude { }` needed.
 
 ---
@@ -199,11 +200,11 @@ dependencyResolutionManagement {
 ```kotlin
 dependencies {
     // All build types — Host APIs + runtime hooks (no-op without full lib)
-    implementation("com.github.farooqkhandev:debugtool-hooks:1.0.5")
+    implementation("com.github.farooqkhandev.debugTool:debugtool-hooks:1.0.5")
 
     // Debug builds only — FAB, menu, Chucker, Azure, overlays
     // (does not transitively include hooks — add hooks above)
-    debugImplementation("com.github.farooqkhandev:debugtool:1.0.5")
+    debugImplementation("com.github.farooqkhandev.debugTool:debugtool:1.0.5")
 }
 ```
 
