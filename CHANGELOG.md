@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.0
+## 1.0.3
 
 - New always-safe module `:debugtool-hooks` (`DebugToolHooks`, `DebugToolNetwork`, Host/Config APIs).
 - Full `:debugtool` depends on hooks via `api`; install wires both new hooks and deprecated registries.
@@ -14,3 +14,11 @@
 ## 1.0.2
 
 - Prior standalone debug menu library release.
+
+## 1.0.1
+
+- Real CameraX + ML Kit QR scanner (replaces camera preview stub).
+
+## 1.0.0
+
+- Initial JitPack release.
