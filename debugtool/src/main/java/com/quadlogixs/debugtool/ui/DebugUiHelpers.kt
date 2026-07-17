@@ -7,15 +7,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.currentCompositeKeyHash
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavDestination
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * Logs recompositions. Uses [LocalCurrentRoute] when the host provides it; otherwise
+ * [fallbackRoute] (typically [DebugToolScaffold]'s `routeTrail`) so stats still accumulate.
+ */
 @Composable
-fun RecompositionLogger() {
-    val route: String = LocalCurrentRoute.current?.value?.route ?: ""
+fun RecompositionLogger(fallbackRoute: String = "debug") {
+    val navRoute = LocalCurrentRoute.current?.value?.route
+    val route = navRoute?.takeIf { it.isNotBlank() } ?: fallbackRoute
     val componentName = currentCompositeKeyHash.toString()
 
     SideEffect {

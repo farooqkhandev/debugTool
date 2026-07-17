@@ -12,10 +12,17 @@ import com.quadlogixs.debugtool.api.DebugToolRegistry
 import timber.log.Timber
 import kotlin.math.sqrt
 
+/**
+ * Accelerometer shake listener.
+ *
+ * By default only invokes [onShakeDetect]. Set [launchChuckerOnShake] to also toggle Chucker;
+ * prefer opening Chucker from the Network Trace menu action.
+ */
 class ShakeDetector(
     private val context: Context,
     private val shakeThreshold: Float = 2.7f,
     private val shakeCooldownMs: Long = 1000L,
+    private val launchChuckerOnShake: Boolean = false,
     private val onShakeDetect: () -> Unit,
 ) : SensorEventListener {
 
@@ -54,7 +61,10 @@ class ShakeDetector(
     fun onShakeDetected() {
         try {
             onShakeDetect()
-            if (!DebugToolRegistry.config.features.chuckerEnabled) return
+            if (!launchChuckerOnShake) return
+            if (!DebugToolRegistry.isInstalled() || !DebugToolRegistry.config.features.chuckerEnabled) {
+                return
+            }
             if (isChuckerRunning()) {
                 destroyChuckerIfOpen()
             } else {
@@ -65,7 +75,7 @@ class ShakeDetector(
                 )
             }
         } catch (e: Exception) {
-            Timber.tag("ShakeDetector").e(e, "Error launching or destroying Chucker: ${e.message}")
+            Timber.tag("ShakeDetector").e(e, "Error handling shake: ${e.message}")
         }
     }
 

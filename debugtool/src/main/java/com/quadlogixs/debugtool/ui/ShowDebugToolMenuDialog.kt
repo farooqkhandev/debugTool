@@ -40,13 +40,14 @@ import com.quadlogixs.debugtool.ui.components.LabelSmallText
 import com.quadlogixs.debugtool.ui.components.TitleLargeText
 import com.quadlogixs.debugtool.ui.components.ResourceImage
 import com.quadlogixs.debugtool.core.ApiSpeedTracker
+import com.quadlogixs.debugtool.core.DebugEnvironmentStore
 import com.quadlogixs.debugtool.core.DebugUiToolsStore
 import com.quadlogixs.debugtool.core.MockApiResponseStore
 
 data class DebugMenuMetadata(
     val appVersion: String = "",
     val environmentName: String = "Default",
-    val azureLabel: String = "devops-ais/AikDigital",
+    val azureLabel: String = "",
     val crashCount: Int = 0,
 )
 
@@ -456,21 +457,14 @@ enum class DebuggerActions {
 }
 
 /**
- * Prefers the selected runtime environment title from [DebugToolHost], so the menu
- * does not show the build flavor (e.g. DEV) when QA/UAT/etc. is selected.
+ * Prefers the selected environment title from [DebugEnvironmentStore]
+ * (library source of truth), so the menu reflects custom / selected URLs — not only the host catalog.
  */
 private suspend fun resolveSelectedEnvironmentTitle(fallback: String): String {
     if (!DebugToolRegistry.isInstalled()) return fallback
     return runCatching {
-        val host = DebugToolRegistry.host
-        val environments = host.environments()
-        val currentUrl = host.currentEnvironment().trimEnd('/')
-        if (currentUrl.isBlank() || currentUrl.equals("default", ignoreCase = true)) {
-            return@runCatching environments.firstOrNull()?.title ?: fallback
-        }
-        environments
-            .firstOrNull { it.url.trimEnd('/') == currentUrl }
-            ?.title
-            ?: fallback
+        val hostBase = DebugToolRegistry.host.environments()
+        val currentUrl = DebugEnvironmentStore.currentUrl()
+        DebugEnvironmentStore.titleForSelectedUrl(currentUrl, hostBase) ?: fallback
     }.getOrDefault(fallback)
 }

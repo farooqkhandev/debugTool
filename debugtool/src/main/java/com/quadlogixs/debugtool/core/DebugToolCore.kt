@@ -18,6 +18,7 @@ object DebugToolCore {
 
     fun init(application: Application, config: DebugToolConfig) {
         DebugToolRegistry.install(config)
+        DebugEnvironmentStore.init(application)
         Thread.setDefaultUncaughtExceptionHandler(AppCrashHandler(application))
         if (Timber.forest().isEmpty()) {
             Timber.plant(Timber.DebugTree())

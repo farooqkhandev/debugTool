@@ -1,12 +1,9 @@
 package com.quadlogixs.debugtool.ui
 
 import android.app.Activity
-import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Handler
 import android.os.Looper
-import android.util.Base64
 import android.view.PixelCopy
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -64,12 +61,12 @@ import com.quadlogixs.debugtool.ui.components.SpaceDefault
 import com.quadlogixs.debugtool.ui.components.AssignToItem
 import com.quadlogixs.debugtool.ui.showDebugToast
 import com.quadlogixs.debugtool.ui.theme.LocalExtraThemeColors
+import com.quadlogixs.debugtool.api.DebugToolRegistry
 import com.quadlogixs.debugtool.core.domain.entity.LogIssueRequestEntity
 import com.quadlogixs.debugtool.core.domain.entity.UploadAttachmentRequestEntity
 import com.quadlogixs.debugtool.api.ResponseStates
 import com.quadlogixs.debugtool.ui.toBase64
 import timber.log.Timber
-import java.io.ByteArrayOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,10 +105,11 @@ fun DebugIssueDialog(
     var screenShotBitmap: Bitmap? by remember { mutableStateOf(null) }
     var showImageEditor: Boolean by remember { mutableStateOf(false) }
 
-    val testBase64 = getDrawableBase64(
-        context = context,
-        drawableResId = R.drawable.app_background
-    )
+    val azureConfig = remember {
+        if (DebugToolRegistry.isInstalled()) DebugToolRegistry.config.azure else null
+    }
+    val defaultAreaPath = azureConfig?.areaPath.orEmpty()
+
     Dialog(
         onDismissRequest = { onClickCallBack() },
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -283,7 +281,11 @@ fun DebugIssueDialog(
                                         area = it
                                     },
                                     labelTextSize = 14.textSdp,
-                                    supportText = "Default area is set to AikDigial\\Android Bug",
+                                    supportText = if (defaultAreaPath.isNotBlank()) {
+                                        "Default area is set to $defaultAreaPath"
+                                    } else {
+                                        "Optional Azure area path"
+                                    },
                                     fieldLabel = "Area (Optional)",
                                     placeholder = "Area",
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Unspecified)
@@ -396,50 +398,45 @@ fun DebugIssueDialog(
                                     .padding(1.sdp)
                                     .align(Alignment.CenterHorizontally)
                             ) {
-                                /*viewModel.logIssue(
-                                    LogIssueRequestEntity(
-                                        title = "",
-                                        description = description,
-                                        areaPath = area.takeIf { it.isNotEmpty() }
-                                            ?: "AikDigital\\Android Bug",
-                                        customStepsToReproduce = stepsList.toList(),
-                                        reproduceStepsRoute = routeTrail,
-                                        issueType = "Bug",
-                                        assignedTo = selectedAssignedItem.emailAddress,
-                                        base64Screenshot = ""
-                                    )
-                                )*/
+                                val organization = azureConfig?.organization.orEmpty()
+                                val project = azureConfig?.project.orEmpty()
+                                val areaPath = area.takeIf { it.isNotEmpty() } ?: defaultAreaPath
                                 if (screenShotBitmap != null) {
-                                    screenShotBase64 = screenShotBitmap?.toBase64()
+                                    val screenshot = screenShotBitmap?.toBase64().orEmpty()
+                                    screenShotBase64 = screenshot
                                     viewModel.reportIssueWithAttachment(
                                         uploadRequest = UploadAttachmentRequestEntity(
-                                            base64Screenshot = testBase64
+                                            organization = organization,
+                                            project = project,
+                                            base64Screenshot = screenshot,
                                         ),
                                         issueRequest = LogIssueRequestEntity(
                                             title = "",
                                             description = description,
-                                            areaPath = area.takeIf { it.isNotEmpty() }
-                                                ?: "AikDigital\\Android Bug",
+                                            organization = organization,
+                                            project = project,
+                                            areaPath = areaPath,
                                             customStepsToReproduce = stepsList.toList(),
                                             reproduceStepsRoute = routeTrail,
                                             issueType = "Bug",
                                             assignedTo = selectedAssignedItem.emailAddress,
-                                            base64Screenshot = screenShotBase64
-                                        )
+                                            base64Screenshot = screenshot,
+                                        ),
                                     )
                                 } else {
                                     viewModel.logIssue(
                                         LogIssueRequestEntity(
                                             title = "",
                                             description = description,
-                                            areaPath = area.takeIf { it.isNotEmpty() }
-                                                ?: "AikDigital\\Android Bug",
+                                            organization = organization,
+                                            project = project,
+                                            areaPath = areaPath,
                                             customStepsToReproduce = stepsList.toList(),
                                             reproduceStepsRoute = routeTrail,
                                             issueType = "Bug",
                                             assignedTo = selectedAssignedItem.emailAddress,
-                                            base64Screenshot = ""
-                                        )
+                                            base64Screenshot = "",
+                                        ),
                                     )
                                 }
                             }
@@ -565,16 +562,6 @@ fun StepsToReproduceSection(
         }
     }
 }
-
-fun getDrawableBase64(context: Context, drawableResId: Int): String {
-    val bitmap = BitmapFactory.decodeResource(context.resources, drawableResId)
-    val byteArrayOutputStream = ByteArrayOutputStream()
-    bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
-    val byteArray = byteArrayOutputStream.toByteArray()
-    return Base64.encodeToString(byteArray, Base64.NO_WRAP)
-}
-
-
 
 fun captureMainScreen(activity: Activity, callback: (Bitmap?) -> Unit) {
     val window = activity.window

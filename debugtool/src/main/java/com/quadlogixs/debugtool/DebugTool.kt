@@ -54,11 +54,21 @@ object DebugTool {
 
     /**
      * Optional shake detector wrapping the library [ShakeDetector].
-     * FAB reveal is always-on via [com.quadlogixs.debugtool.ui.DebugToolScaffold];
-     * shake is typically used to open Chucker / custom callbacks.
+     *
+     * Prefer [com.quadlogixs.debugtool.ui.DebugToolScaffold], which auto-starts shake to
+     * toggle FAB visibility when [com.quadlogixs.debugtool.ui.DebugToolRevealMode.ShakeToReveal]
+     * is set. This helper is for host-owned custom shake handling (Chucker launch is off by default).
      */
-    fun createShakeDetector(activity: Activity, onShake: () -> Unit): ShakeHandle {
-        val detector = ShakeDetector(activity, onShakeDetect = onShake)
+    fun createShakeDetector(
+        activity: Activity,
+        onShake: () -> Unit,
+        launchChuckerOnShake: Boolean = false,
+    ): ShakeHandle {
+        val detector = ShakeDetector(
+            context = activity,
+            launchChuckerOnShake = launchChuckerOnShake,
+            onShakeDetect = onShake,
+        )
         return object : ShakeHandle {
             override fun start() = detector.start()
             override fun stop() = detector.stop()

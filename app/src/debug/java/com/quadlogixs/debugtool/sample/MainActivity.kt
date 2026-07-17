@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.quadlogixs.debugtool.ui.DebugToolRevealMode
 import com.quadlogixs.debugtool.ui.DebugToolScaffold
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -20,7 +21,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    DebugToolScaffold {
+                    // Shake to show/hide FAB (see DebugToolConfig.showFabOnLaunch).
+                    DebugToolScaffold(revealMode = DebugToolRevealMode.ShakeToReveal) {
                         SampleContent()
                     }
                 }

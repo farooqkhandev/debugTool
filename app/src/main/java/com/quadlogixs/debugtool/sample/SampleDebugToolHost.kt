@@ -15,7 +15,11 @@ import javax.inject.Singleton
 
 /**
  * Minimal [DebugToolHost] for the sample app.
- * Host apps should implement the same contract with their own prefs / env / encryption.
+ *
+ * Host apps should implement the same contract (env apply / encryption / assignees).
+ * Environment selection + custom URLs are also persisted inside `:debugtool`
+ * ([com.quadlogixs.debugtool.core.DebugEnvironmentStore]); [applyEnvironment] still
+ * runs so hosts can recreate clients.
  */
 @Singleton
 class SampleDebugToolHost @Inject constructor(
@@ -91,6 +95,8 @@ class SampleDebugToolHost @Inject constructor(
             // Prefer DebugToolHost.assignees(); config list is only a fallback.
             assignees = emptyList(),
             azureLabel = "sample/debugTool",
+            // FAB hidden until device shake (DebugToolScaffold default = ShakeToReveal).
+            showFabOnLaunch = false,
         )
     }
 }

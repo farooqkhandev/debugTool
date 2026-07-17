@@ -183,7 +183,7 @@ fun EnvironmentSwitcherDialog(
                             LabelMediumText(
                                 text = "Add",
                                 fontSize = 12.textSdp,
-                                overrideColor = MaterialTheme.colorScheme.background
+                                overrideColor = MaterialTheme.colorScheme.onPrimary,
                             )
                         },
                         onClick = {
@@ -211,14 +211,14 @@ fun EnvironmentSwitcherDialog(
                         BaseButton(
                             modifier = Modifier.height(30.dp),
                             primary = true,
-                            containerColor = MaterialTheme.colorScheme.onPrimary,
+                            containerColor = Color(0xFFE5E5EA),
                             borderColor = Color.Unspecified,
                             enabled = true,
                             content = {
                                 LabelMediumText(
                                     text = "Close",
                                     fontSize = 12.textSdp,
-                                    overrideColor = MaterialTheme.colorScheme.background
+                                    overrideColor = Color(0xFF1C1C1E),
                                 )
                             },
                             onClick = { onDismiss() }
@@ -227,18 +227,18 @@ fun EnvironmentSwitcherDialog(
                         BaseButton(
                             modifier = Modifier.height(30.dp),
                             primary = true,
-                            containerColor = Color.White,
-                            borderColor = MaterialTheme.colorScheme.primary,
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            borderColor = Color.Unspecified,
                             enabled = true,
                             content = {
                                 LabelMediumText(
-                                    text = if(!showCustomUrlLayout)"Add Custom" else "Hide Custom",
+                                    text = if (!showCustomUrlLayout) "Add Custom" else "Hide Custom",
                                     fontSize = 12.textSdp,
-                                    overrideColor = MaterialTheme.colorScheme.onBackground
+                                    overrideColor = MaterialTheme.colorScheme.onPrimary,
                                 )
                             },
                             onClick = {
-                                showCustomUrlLayout =!showCustomUrlLayout
+                                showCustomUrlLayout = !showCustomUrlLayout
                             }
                         )
                     }

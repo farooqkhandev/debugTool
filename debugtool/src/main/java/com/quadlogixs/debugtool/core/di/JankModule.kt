@@ -9,14 +9,20 @@ import com.quadlogixs.debugtool.core.FrameDataProvider
 import com.quadlogixs.debugtool.core.FileJankLogRepositoryImp
 import com.quadlogixs.debugtool.core.JankFrameProviderImpl
 import com.quadlogixs.debugtool.core.JankLogRepository
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface DebugJankEntryPoint {
+    fun frameDataProvider(): FrameDataProvider
+}
 
 @Module
 @InstallIn(SingletonComponent::class)
