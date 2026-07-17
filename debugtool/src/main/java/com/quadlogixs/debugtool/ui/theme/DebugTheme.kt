@@ -45,8 +45,10 @@ private val DebugLightColorScheme: ColorScheme = lightColorScheme(
 )
 
 /**
- * Material3 theme used for library FAB, menu, and dialogs so they do not inherit
- * the host app's dark / branded color scheme.
+ * Material3 theme for **debug overlays only** (menu / dialogs).
+ *
+ * Never wrap host app [content] in this theme — that replaces the host primary color
+ * (regression in the mis-tagged 1.0.5 dark release where teal overrode Login buttons).
  */
 @Composable
 fun DebugTheme(content: @Composable () -> Unit) {

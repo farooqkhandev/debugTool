@@ -59,12 +59,12 @@ enum class DebugToolRevealMode {
 }
 
 /**
- * Host-app entry for the full debug UI: Dynamic Type density wrapper for [content],
+ * Host-app entry for the full debug UI: optional Dynamic Type density for [content],
  * screen-size simulator, layout grid, shake-to-reveal FAB, menu, and feature dialogs.
  *
- * Overlay chrome (FAB / menu / dialogs) is wrapped in [DebugTheme] so it does not inherit
- * the host Material color scheme. Host [content] keeps the host theme but receives typography
- * scale via [LocalDensity].
+ * **Theme isolation:** host [content] is never wrapped in [DebugTheme] / MaterialTheme.
+ * Only debug overlays (menu / dialogs) use [DebugTheme], so the host primary color
+ * (e.g. yellow Login button) is not replaced by the library palette.
  *
  * Must be composed from a Hilt [ComponentActivity] (`@AndroidEntryPoint`) so
  * dialog ViewModels resolve correctly.
@@ -84,6 +84,7 @@ fun DebugToolScaffold(
     val showFabOnLaunch = config?.showFabOnLaunch == true
     val fabIconRes = config?.fabIconRes ?: R.drawable.ic_bug
     val fabActiveIconRes = config?.fabActiveIconRes ?: R.drawable.ic_bug_active
+    val chuckerEnabled = config?.features?.chuckerEnabled == true
 
     var offset by remember { mutableStateOf(Offset(48f, 160f)) }
     var fabVisible by remember(revealMode, showFabOnLaunch) {
@@ -194,8 +195,65 @@ fun DebugToolScaffold(
         }
     }
 
+    fun openNetworkTrace() {
+        if (!chuckerEnabled) {
+            context.showDebugToast("Chucker is disabled")
+            return
+        }
+        val launchContext = activity ?: context
+        runCatching {
+            launchContext.startActivity(
+                Chucker.getLaunchIntent(launchContext).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                },
+            )
+        }.onFailure {
+            Timber.tag("DebugToolScaffold").e(it, "Failed to launch Chucker")
+            context.showDebugToast("Unable to open Network Trace")
+        }
+    }
+
+    fun handleDebugAction(action: DebuggerActions) {
+        when (action) {
+            DebuggerActions.HaltRequestResponse -> {
+                DebugApiHalterChecker.haltRequestEnabled = true
+                DebugApiHalterChecker.haltResponseEnabled = true
+                isActive = true
+            }
+            DebuggerActions.HaltAllRequestResponse -> {
+                DebugApiHalterChecker.haltAllRequestResponseEnabled =
+                    !DebugApiHalterChecker.haltAllRequestResponseEnabled
+                isActive = DebugApiHalterChecker.haltAllRequestResponseEnabled
+            }
+            DebuggerActions.ReportBug -> showBug = true
+            DebuggerActions.CrashReport -> showCrash = true
+            DebuggerActions.MemoryUsageStats -> showMemory = true
+            DebuggerActions.RecompositionStats -> showRecomposition = true
+            DebuggerActions.JunkStats -> showJank = true
+            DebuggerActions.LocalLogs -> showLogcat = true
+            DebuggerActions.ApiPerformance -> showApiPerf = true
+            DebuggerActions.Environments -> showEnv = true
+            DebuggerActions.ScanQRCode -> showQr = true
+            DebuggerActions.MockResponses -> showMocks = true
+            DebuggerActions.NetworkTrace -> openNetworkTrace()
+            DebuggerActions.EncToggle,
+            DebuggerActions.UiTools,
+            DebuggerActions.DeviceSimulation,
+            DebuggerActions.DynamicType,
+            DebuggerActions.AnimationSpeed,
+            DebuggerActions.LayoutGridOverlay,
+            DebuggerActions.ScreenSizeSimulator,
+            DebuggerActions.LocationSpoofer,
+            DebuggerActions.RemoteLogs,
+            DebuggerActions.NONE,
+            -> Unit
+        }
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
-        CompositionLocalProvider(LocalDensity provides scaledDensity) {
+        // Host content keeps the host MaterialTheme. Density is only overridden when
+        // Dynamic Type scale != 1f so default install does not touch host layout metrics.
+        val hostContent: @Composable () -> Unit = {
             DebugScreenSizeSimulatorFrame(modifier = Modifier.fillMaxSize()) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     content()
@@ -203,26 +261,35 @@ fun DebugToolScaffold(
                 }
             }
         }
-
-        DebugTheme {
-            RecompositionLogger(fallbackRoute = routeTrail)
-
-            if (fabVisible) {
-                ResourceImage(
-                    image = if (isActive) fabActiveIconRes else fabIconRes,
-                    modifier = Modifier
-                        .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
-                        .size(48.dp)
-                        .pointerInput(Unit) {
-                            detectDragGestures { change, dragAmount ->
-                                offset += dragAmount
-                                change.consume()
-                            }
-                        }
-                        .safeClickable { menuVisible = !menuVisible },
-                )
+        if (typographyScale == 1f) {
+            hostContent()
+        } else {
+            CompositionLocalProvider(LocalDensity provides scaledDensity) {
+                hostContent()
             }
+        }
 
+        // FAB: no MaterialTheme — must not tint host colors.
+        RecompositionLogger(fallbackRoute = routeTrail)
+
+        if (fabVisible) {
+            ResourceImage(
+                image = if (isActive) fabActiveIconRes else fabIconRes,
+                modifier = Modifier
+                    .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
+                    .size(48.dp)
+                    .pointerInput(Unit) {
+                        detectDragGestures { change, dragAmount ->
+                            offset += dragAmount
+                            change.consume()
+                        }
+                    }
+                    .safeClickable { menuVisible = !menuVisible },
+            )
+        }
+
+        // DebugTheme ONLY around library overlays — never around [content].
+        DebugTheme {
             HaltApiDialog()
 
             if (menuVisible) {
@@ -239,47 +306,7 @@ fun DebugToolScaffold(
                             context.showDebugToast("Encryption: $enabled (restart recommended)")
                         }
                     },
-                    onAction = { action ->
-                        when (action) {
-                            DebuggerActions.HaltRequestResponse -> {
-                                DebugApiHalterChecker.haltRequestEnabled = true
-                                DebugApiHalterChecker.haltResponseEnabled = true
-                                isActive = true
-                            }
-                            DebuggerActions.HaltAllRequestResponse -> {
-                                DebugApiHalterChecker.haltAllRequestResponseEnabled =
-                                    !DebugApiHalterChecker.haltAllRequestResponseEnabled
-                                isActive = DebugApiHalterChecker.haltAllRequestResponseEnabled
-                            }
-                            DebuggerActions.ReportBug -> showBug = true
-                            DebuggerActions.CrashReport -> showCrash = true
-                            DebuggerActions.MemoryUsageStats -> showMemory = true
-                            DebuggerActions.RecompositionStats -> showRecomposition = true
-                            DebuggerActions.JunkStats -> showJank = true
-                            DebuggerActions.LocalLogs -> showLogcat = true
-                            DebuggerActions.ApiPerformance -> showApiPerf = true
-                            DebuggerActions.Environments -> showEnv = true
-                            DebuggerActions.ScanQRCode -> showQr = true
-                            DebuggerActions.MockResponses -> showMocks = true
-                            DebuggerActions.NetworkTrace -> {
-                                if (config?.features?.chuckerEnabled != true) {
-                                    context.showDebugToast("Chucker is disabled")
-                                } else {
-                                    runCatching {
-                                        context.startActivity(
-                                            Chucker.getLaunchIntent(context).apply {
-                                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                            },
-                                        )
-                                    }.onFailure {
-                                        Timber.tag("DebugToolScaffold").e(it, "Failed to launch Chucker")
-                                        context.showDebugToast("Unable to open Network Trace")
-                                    }
-                                }
-                            }
-                            else -> context.showDebugToast("Action: $action")
-                        }
-                    },
+                    onAction = { handleDebugAction(it) },
                 )
             }
 
